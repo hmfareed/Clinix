@@ -5,6 +5,8 @@ import { assessSymptoms } from "@/services/assessment-service";
 import { checkRateLimit } from "@/lib/security/rate-limit";
 import { logAuditEvent } from "@/lib/audit/audit";
 import { auth } from "@/lib/auth/auth";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import Assessment from "@/models/Assessment";
 
 const assessRequestSchema = z.object({
   sessionId: z.string().optional(),
@@ -79,11 +81,45 @@ export async function POST(req: NextRequest) {
 
     const assessment = await assessSymptoms(parseResult.data);
 
+    // If authenticated user, persist structured assessment
+    let persistedAssessmentId: string | undefined;
+    if (session?.user?.id) {
+      try {
+        await connectToDatabase();
+        const saved = await Assessment.create({
+          patientId: session.user.id,
+          sessionId: parseResult.data.sessionId,
+          symptoms: [{ description: parseResult.data.symptoms }],
+          urgency: assessment.urgency,
+          summary: assessment.summary,
+          possibleConditions: assessment.possibleConditions,
+          recommendations: assessment.recommendedNextSteps,
+          limitations: assessment.limitations,
+          medicationGuidance: assessment.medicationGuidance,
+          triage: {
+            level: assessment.urgency,
+            ruleSetVersion: assessment.aiMetadata.ruleSetVersion,
+            checkedAt: new Date(assessment.aiMetadata.completedAt || Date.now()),
+          },
+          aiMetadata: {
+            provider: assessment.aiMetadata.provider,
+            model: assessment.aiMetadata.model,
+            promptVersion: assessment.aiMetadata.promptVersion,
+          },
+        });
+        persistedAssessmentId = String(saved._id);
+      } catch (saveErr) {
+        console.error("[AssessAPI] Could not persist assessment to database:", saveErr);
+      }
+    }
+
     // Audit log (sanitized, no full transcript)
     await logAuditEvent({
       actorId: session?.user?.id,
       actorRole: (session?.user as unknown as { role?: string })?.role || "anonymous",
       action: "ai_assessment_completed",
+      resourceType: "Assessment",
+      resourceId: persistedAssessmentId,
       outcome: "success",
       ip: clientIp,
       metadata: {
@@ -97,6 +133,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         success: true,
+        assessmentId: persistedAssessmentId,
         data: assessment,
         requestId,
       },

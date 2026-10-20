@@ -64,6 +64,11 @@ export function Navbar() {
           {/* User Auth Controls */}
           {status === "authenticated" ? (
             <div className="flex items-center gap-2">
+              <Link href="/dashboard">
+                <Button size="sm" className="bg-teal-600 text-white hover:bg-teal-700 text-xs font-semibold">
+                  Dashboard
+                </Button>
+              </Link>
               <div className="hidden lg:flex flex-col text-right">
                 <span className="text-xs font-semibold text-slate-900 dark:text-slate-100">
                   {session.user?.name || session.user?.email}
