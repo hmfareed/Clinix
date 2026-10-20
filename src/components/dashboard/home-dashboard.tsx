@@ -132,8 +132,8 @@ export function HomeDashboard() {
       return;
     }
 
-    // Prepare conversation history matching API schema
-    const conversationHistory = newMessages
+    // Prepare conversation history matching API schema (prior turns)
+    const conversationHistory = messages
       .filter((m) => m.id !== "m-0")
       .map((m) => ({
         role: m.sender === "user" ? ("patient" as const) : ("assistant" as const),

@@ -1,8 +1,8 @@
 import OpenAI from "openai";
 
 export const NVIDIA_BASE_URL = "https://integrate.api.nvidia.com/v1";
-export const DEFAULT_MODEL = "meta/llama-3.1-70b-instruct";
-export const AI_TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS) || 30000;
+export const DEFAULT_MODEL = "meta/llama-3.2-11b-vision-instruct";
+export const AI_TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS) || 90000;
 
 export class AssessmentUnavailableError extends Error {
   public readonly code = "AI_UNAVAILABLE";
@@ -34,3 +34,4 @@ export function getNvidiaClient(): OpenAI {
 }
 
 export const MODEL = process.env.NVIDIA_MODEL || DEFAULT_MODEL;
+export const FALLBACK_MODEL = process.env.NVIDIA_FALLBACK_MODEL || "openai/gpt-oss-20b";

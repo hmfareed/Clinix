@@ -123,18 +123,27 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Build updated history
-    const updatedHistory = [
-      ...conversationHistory,
-      { role: "patient" as const, content: message },
-    ];
+    // Build updated history ensuring no duplicate patient turns
+    const lastHistoryMsg = conversationHistory[conversationHistory.length - 1];
+    const isAlreadyInHistory =
+      lastHistoryMsg &&
+      lastHistoryMsg.role === "patient" &&
+      lastHistoryMsg.content.trim() === message.trim();
+
+    const updatedHistory = isAlreadyInHistory
+      ? conversationHistory
+      : [...conversationHistory, { role: "patient" as const, content: message }];
 
     // Enforce maximum turn cap or forced conclusion
     const patientTurns = updatedHistory.filter((m) => m.role === "patient").length;
     const shouldConclude = concludeNow || patientTurns >= MAX_FOLLOW_UP_TURNS;
 
+    const consolidatedSymptoms = symptoms.includes(message)
+      ? symptoms
+      : `${symptoms}. Latest detail: ${message}`;
+
     const assessment = await assessSymptoms({
-      symptoms: `${symptoms}. Latest detail: ${message}`,
+      symptoms: consolidatedSymptoms,
       conversationHistory: updatedHistory,
       age,
       allergies,

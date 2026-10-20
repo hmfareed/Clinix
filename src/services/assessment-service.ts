@@ -1,4 +1,4 @@
-import { getNvidiaClient, MODEL, isNvidiaConfigured, AssessmentUnavailableError } from "@/lib/ai/nvidia";
+import { getNvidiaClient, MODEL, FALLBACK_MODEL, isNvidiaConfigured, AssessmentUnavailableError } from "@/lib/ai/nvidia";
 import { assessmentSchema, type Assessment } from "@/lib/medical/assessment-schema";
 import { checkEmergencyRules } from "@/lib/safety/triage-engine";
 import { enforceSafetyGate } from "@/lib/safety/post-generation-gate";
@@ -94,19 +94,10 @@ export async function assessSymptoms(input: ClinicalInput): Promise<AssessmentRe
   if (isNvidiaConfigured()) {
     const client = getNvidiaClient();
 
-    // Build chat message trajectory
+    // Build chat message trajectory ensuring valid alternating turns
     const messages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
       { role: "system", content: SYSTEM_PROMPT_V1 },
     ];
-
-    if (input.conversationHistory && input.conversationHistory.length > 0) {
-      for (const msg of input.conversationHistory) {
-        messages.push({
-          role: msg.role === "patient" ? "user" : "assistant",
-          content: msg.content,
-        });
-      }
-    }
 
     // Prepare patient payload excluding sensitive PII
     const patientPayload = {
@@ -119,17 +110,42 @@ export async function assessSymptoms(input: ClinicalInput): Promise<AssessmentRe
       language: input.language || "en",
     };
 
-    messages.push({
-      role: "user",
-      content: JSON.stringify(patientPayload),
-    });
+    if (input.conversationHistory && input.conversationHistory.length > 0) {
+      for (const msg of input.conversationHistory) {
+        const role = msg.role === "patient" ? ("user" as const) : ("assistant" as const);
+        const prevMsg = messages[messages.length - 1];
+        if (prevMsg && prevMsg.role === role) {
+          prevMsg.content = `${prevMsg.content}. ${msg.content}`;
+        } else {
+          messages.push({ role, content: msg.content });
+        }
+      }
+
+      // If the last message is already a user message, enrich it with clinical payload; otherwise append user message
+      const lastMsg = messages[messages.length - 1];
+      if (lastMsg && lastMsg.role === "user") {
+        lastMsg.content = `${lastMsg.content}\nClinical Details: ${JSON.stringify(patientPayload)}`;
+      } else {
+        messages.push({
+          role: "user",
+          content: JSON.stringify(patientPayload),
+        });
+      }
+    } else {
+      messages.push({
+        role: "user",
+        content: JSON.stringify(patientPayload),
+      });
+    }
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       attempts = attempt;
+      const currentModel = attempt === 1 ? MODEL : FALLBACK_MODEL;
       try {
         const completion = await client.chat.completions.create({
-          model: MODEL,
+          model: currentModel,
           temperature: 0, // Deterministic zero-temperature for clinical consistency
+          max_tokens: 1024,
           messages,
         });
 
@@ -161,7 +177,7 @@ export async function assessSymptoms(input: ClinicalInput): Promise<AssessmentRe
           ...gatedOutput,
           aiMetadata: {
             provider: "NVIDIA",
-            model: MODEL,
+            model: currentModel,
             promptVersion: PROMPT_VERSION_V1,
             ruleSetVersion: preSafety.ruleSetVersion,
             attempts,

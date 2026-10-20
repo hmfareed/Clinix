@@ -33,12 +33,20 @@ export function extractJson<T = Record<string, unknown>>(rawContent: string): T 
     const candidate = text.substring(firstBrace, lastBrace + 1);
     try {
       return JSON.parse(candidate) as T;
-    } catch (parseError) {
-      throw new Error(
-        `Failed to parse extracted JSON candidate: ${
-          parseError instanceof Error ? parseError.message : String(parseError)
-        }`
-      );
+    } catch {
+      // Clean common trailing commas or control characters and retry
+      try {
+        const sanitized = candidate
+          .replace(/,\s*([}\]])/g, "$1")
+          .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, "");
+        return JSON.parse(sanitized) as T;
+      } catch (parseError) {
+        throw new Error(
+          `Failed to parse extracted JSON candidate: ${
+            parseError instanceof Error ? parseError.message : String(parseError)
+          }`
+        );
+      }
     }
   }
 
