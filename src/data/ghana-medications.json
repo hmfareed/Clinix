@@ -1,0 +1,611 @@
+[
+  {
+    "id": "GH-MED-001",
+    "genericName": "Paracetamol",
+    "brandNames": ["Panadol", "Febrax", "Calpol", "Emcap", "Tylenol", "Efferalgan"],
+    "therapeuticClass": "Analgesic and Antipyretic",
+    "classification": "over_the_counter",
+    "approvedIndications": [
+      "Relief of mild to moderate pain (e.g. headache, toothache, muscle aches)",
+      "Reduction of fever"
+    ],
+    "contraindications": [
+      {
+        "condition": "Severe hepatic (liver) impairment",
+        "explanation": "Paracetamol is metabolized in the liver; overdose or impaired liver function can lead to fatal hepatic necrosis.",
+        "severity": "critical"
+      },
+      {
+        "condition": "Known hypersensitivity to paracetamol",
+        "explanation": "Risk of severe allergic reaction or skin reactions.",
+        "severity": "critical"
+      }
+    ],
+    "ageRestrictions": {
+      "minAgeYears": 0.25,
+      "warning": "Infants under 3 months should only receive paracetamol on direct advice of a pediatrician or physician."
+    },
+    "pregnancyPrecautions": {
+      "isContraindicated": false,
+      "warning": "Considered the preferred first-line analgesic/antipyretic during pregnancy when clinically needed, at the lowest effective dose for the shortest duration. Consult your healthcare provider."
+    },
+    "interactions": [
+      {
+        "medicineOrClass": "Warfarin",
+        "effect": "Prolonged regular paracetamol use may enhance the anticoagulant effect of warfarin, increasing bleeding risk.",
+        "severity": "moderate"
+      },
+      {
+        "medicineOrClass": "Other Paracetamol-containing medicines",
+        "effect": "Combining multiple cough/cold or pain medicines containing paracetamol can lead to accidental toxic overdose.",
+        "severity": "major"
+      }
+    ],
+    "commonSideEffects": [
+      "Generally well tolerated at therapeutic doses",
+      "Rare: skin rash, hypersensitivity reactions"
+    ],
+    "administrationWarnings": [
+      "Never exceed the maximum recommended daily dose (typically 4000 mg for adults in 24 hours).",
+      "Do not take with other medicines containing paracetamol simultaneously.",
+      "Seek medical advice if pain lasts more than 5 days or fever lasts more than 3 days.",
+      "Avoid chronic excessive alcohol intake while taking paracetamol."
+    ],
+    "dosageDisclaimer": "Individual dosages (mg or ml) must be determined by a registered pharmacist or physician based on patient age, weight, and renal status. Always check the manufacturer packaging leaflet.",
+    "referenceSource": {
+      "name": "Ghana Ministry of Health Standard Treatment Guidelines / Ghana FDA",
+      "jurisdiction": "GH",
+      "version": "2024-v1",
+      "sourceUrl": "https://www.fdaghana.gov.gh",
+      "lastReviewedAt": "2026-01-15T00:00:00.000Z",
+      "reviewedBy": "Dr. K. Mensah, Clinical Reviewer"
+    }
+  },
+  {
+    "id": "GH-MED-002",
+    "genericName": "Oral Rehydration Salts (ORS)",
+    "brandNames": ["Oralite", "Hydral", "WHO-ORS", "Electrolyte Solution"],
+    "therapeuticClass": "Oral Electrolyte Replacement",
+    "classification": "over_the_counter",
+    "approvedIndications": [
+      "Prevention and treatment of dehydration caused by acute diarrhea and vomiting"
+    ],
+    "contraindications": [
+      {
+        "condition": "Severe dehydration with shock or unconsciousness",
+        "explanation": "Severe dehydration is a medical emergency requiring immediate intravenous fluid resuscitation in a hospital.",
+        "severity": "critical"
+      },
+      {
+        "condition": "Intractable vomiting or bowel obstruction",
+        "explanation": "Inability to retain fluids orally requires parenteral rehydration at a clinical facility.",
+        "severity": "critical"
+      }
+    ],
+    "ageRestrictions": {
+      "minAgeYears": 0,
+      "warning": "Safe for all ages including neonates, but infants with diarrhea must be monitored closely by a healthcare professional."
+    },
+    "pregnancyPrecautions": {
+      "isContraindicated": false,
+      "warning": "Safe and recommended for dehydration during pregnancy and lactation."
+    },
+    "interactions": [],
+    "commonSideEffects": [
+      "Mild nausea if consumed too rapidly"
+    ],
+    "administrationWarnings": [
+      "Always reconstitute the entire sachet in the exact volume of clean drinking water specified on the packet (usually 1 liter or 500 ml).",
+      "Do not boil the solution after preparation.",
+      "Discard any unused reconstituted solution after 24 hours.",
+      "Seek immediate medical attention if child exhibits signs of severe dehydration: sunken eyes, lethargy, or inability to drink."
+    ],
+    "dosageDisclaimer": "Administer frequently in small sips following each loose stool as directed on the sachet. Consult a pharmacist or clinical officer for infants.",
+    "referenceSource": {
+      "name": "WHO Guidelines / Ghana National Diarrheal Disease Control Program",
+      "jurisdiction": "GH",
+      "version": "2024-v1",
+      "sourceUrl": "https://www.fdaghana.gov.gh",
+      "lastReviewedAt": "2026-01-15T00:00:00.000Z",
+      "reviewedBy": "Dr. K. Mensah, Clinical Reviewer"
+    }
+  },
+  {
+    "id": "GH-MED-003",
+    "genericName": "Ibuprofen",
+    "brandNames": ["Advil", "Brufen", "Nurofen", "Motrin"],
+    "therapeuticClass": "Non-Steroidal Anti-Inflammatory Drug (NSAID)",
+    "classification": "over_the_counter",
+    "approvedIndications": [
+      "Relief of inflammatory pain (e.g. arthritis, dental pain, dysmenorrhea/period pain)",
+      "Reduction of fever where paracetamol is insufficient"
+    ],
+    "contraindications": [
+      {
+        "condition": "Active peptic ulcer disease or gastrointestinal bleeding",
+        "explanation": "NSAIDs inhibit gastric prostaglandin synthesis and may cause life-threatening gastrointestinal perforation or hemorrhage.",
+        "severity": "critical"
+      },
+      {
+        "condition": "Third trimester of pregnancy (weeks 28 onwards)",
+        "explanation": "Risk of premature closure of the fetal ductus arteriosus and prolonged labor.",
+        "severity": "critical"
+      },
+      {
+        "condition": "Known NSAID or Aspirin-induced asthma / severe allergy",
+        "explanation": "Risk of acute bronchospasm and anaphylactoid shock.",
+        "severity": "critical"
+      },
+      {
+        "condition": "Severe heart failure or severe renal failure",
+        "explanation": "Fluid retention and worsening renal ischemia.",
+        "severity": "critical"
+      }
+    ],
+    "ageRestrictions": {
+      "minAgeYears": 0.5,
+      "warning": "Not recommended for infants under 3 months or weighing less than 5 kg without direct pediatrician supervision."
+    },
+    "pregnancyPrecautions": {
+      "isContraindicated": true,
+      "warning": "Avoid during pregnancy, strictly contraindicated during the third trimester. Paracetamol is generally preferred. Consult your obstetrician."
+    },
+    "interactions": [
+      {
+        "medicineOrClass": "Warfarin / Anticoagulants",
+        "effect": "Substantially increases the risk of severe gastrointestinal and internal bleeding.",
+        "severity": "major"
+      },
+      {
+        "medicineOrClass": "Aspirin",
+        "effect": "Concurrent use increases ulcer risk and attenuates the cardioprotective effect of low-dose aspirin.",
+        "severity": "major"
+      },
+      {
+        "medicineOrClass": "ACE Inhibitors / ARBs (e.g. Lisinopril, Losartan)",
+        "effect": "Decreases antihypertensive efficacy and increases acute kidney injury risk.",
+        "severity": "moderate"
+      }
+    ],
+    "commonSideEffects": [
+      "Dyspepsia, stomach discomfort or heartburn",
+      "Nausea",
+      "Mild headache or dizziness"
+    ],
+    "administrationWarnings": [
+      "Always take with or immediately after food to minimize stomach irritation.",
+      "Use the lowest effective dose for the shortest duration possible.",
+      "Stop immediately and seek emergency care if you experience black tarry stools or vomit blood."
+    ],
+    "dosageDisclaimer": "Dosage varies strictly by patient weight, age, and renal status. Consult a licensed pharmacist or physician for appropriate dosing.",
+    "referenceSource": {
+      "name": "Ghana MoH Standard Treatment Guidelines / Ghana FDA Register",
+      "jurisdiction": "GH",
+      "version": "2024-v1",
+      "sourceUrl": "https://www.fdaghana.gov.gh",
+      "lastReviewedAt": "2026-01-15T00:00:00.000Z",
+      "reviewedBy": "Dr. K. Mensah, Clinical Reviewer"
+    }
+  },
+  {
+    "id": "GH-MED-004",
+    "genericName": "Cetirizine",
+    "brandNames": ["Zyrtec", "Cetriz", "Alerid", "Virlix"],
+    "therapeuticClass": "Second-Generation Antihistamine",
+    "classification": "over_the_counter",
+    "approvedIndications": [
+      "Symptomatic relief of allergic rhinitis (sneezing, runny nose, itchy watery eyes)",
+      "Relief of chronic urticaria (hives and skin allergy itching)"
+    ],
+    "contraindications": [
+      {
+        "condition": "Severe renal impairment (creatinine clearance < 10 ml/min)",
+        "explanation": "Cetirizine is primarily excreted unchanged by the kidneys; dose accumulation may cause severe sedation.",
+        "severity": "critical"
+      },
+      {
+        "condition": "Hypersensitivity to cetirizine or hydroxyzine",
+        "explanation": "Risk of acute hypersensitivity reactions.",
+        "severity": "critical"
+      }
+    ],
+    "ageRestrictions": {
+      "minAgeYears": 2,
+      "warning": "Children aged under 2 years require pediatric evaluation prior to antihistamine administration."
+    },
+    "pregnancyPrecautions": {
+      "isContraindicated": false,
+      "warning": "Animal studies do not indicate direct harm, but should only be used in pregnancy if clinically necessary and approved by an obstetrician."
+    },
+    "interactions": [
+      {
+        "medicineOrClass": "Alcohol and CNS Depressants",
+        "effect": "May enhance sedation, drowsiness, and impair mental alertness.",
+        "severity": "moderate"
+      }
+    ],
+    "commonSideEffects": [
+      "Mild drowsiness or fatigue in sensitive individuals",
+      "Dry mouth",
+      "Mild headache"
+    ],
+    "administrationWarnings": [
+      "Although less sedating than first-generation antihistamines, patients should exercise caution when driving or operating machinery.",
+      "Avoid alcohol during treatment."
+    ],
+    "dosageDisclaimer": "Follow the product packaging leaflet. Consult a pharmacist for pediatric dosing.",
+    "referenceSource": {
+      "name": "Ghana MoH Standard Treatment Guidelines",
+      "jurisdiction": "GH",
+      "version": "2024-v1",
+      "sourceUrl": "https://www.fdaghana.gov.gh",
+      "lastReviewedAt": "2026-01-15T00:00:00.000Z",
+      "reviewedBy": "Dr. K. Mensah, Clinical Reviewer"
+    }
+  },
+  {
+    "id": "GH-MED-005",
+    "genericName": "Artemether + Lumefantrine",
+    "brandNames": ["Coartem", "Lonart", "Artefan", "Riamet", "Lumart"],
+    "therapeuticClass": "Artemisinin-based Combination Therapy (ACT) Antimalarial",
+    "classification": "prescription_only",
+    "approvedIndications": [
+      "Treatment of acute uncomplicated malaria caused by Plasmodium falciparum"
+    ],
+    "contraindications": [
+      {
+        "condition": "Severe or complicated malaria",
+        "explanation": "Severe malaria (cerebral malaria, severe anemia, respiratory distress) is a life-threatening emergency requiring injectable artesunate in hospital.",
+        "severity": "critical"
+      },
+      {
+        "condition": "First trimester of pregnancy (unless no alternative ACT exists)",
+        "explanation": "Oral quinine plus clindamycin is typically the preferred first-trimester guideline in Ghana unless clinician directs otherwise.",
+        "severity": "warning"
+      },
+      {
+        "condition": "Pre-existing cardiac arrhythmia or QT prolongation",
+        "explanation": "Lumefantrine may prolong the QTc interval.",
+        "severity": "critical"
+      }
+    ],
+    "ageRestrictions": {
+      "minAgeYears": 0.25,
+      "warning": "Infants weighing under 5 kg must be evaluated and managed by a qualified pediatrician."
+    },
+    "pregnancyPrecautions": {
+      "isContraindicated": false,
+      "warning": "In Ghana, ACTs are approved for uncomplicated malaria in the 2nd and 3rd trimesters. In the 1st trimester, consult a clinician for guideline-directed therapy."
+    },
+    "interactions": [
+      {
+        "medicineOrClass": "Erythromycin / Ketoconazole / QT-prolonging drugs",
+        "effect": "Substantially increases lumefantrine serum levels and risk of cardiac dysrhythmias.",
+        "severity": "major"
+      }
+    ],
+    "commonSideEffects": [
+      "Headache, dizziness, fatigue",
+      "Loss of appetite, mild abdominal discomfort",
+      "Cough in pediatric patients"
+    ],
+    "administrationWarnings": [
+      "MUST BE PRECEDED BY A LABORATORY TEST: In Ghana, antimalarial policy strictly requires confirming malaria parasites (via RDT or microscopy) before treatment.",
+      "Take with meals or drinks containing fat (e.g. milk, soup) to ensure adequate lumefantrine absorption.",
+      "The full 3-day course of 6 doses must be completed even if symptoms resolve quickly.",
+      "Clinix does not prescribe or dispense antimalarials. Please see a healthcare professional."
+    ],
+    "dosageDisclaimer": "Dosing depends on precise patient weight band (5-14kg, 15-24kg, 25-34kg, >35kg) over a strict 6-dose schedule. A pharmacist or clinic must calculate and supervise this.",
+    "referenceSource": {
+      "name": "Ghana National Malaria Elimination Programme (NMEP) / MoH Guidelines",
+      "jurisdiction": "GH",
+      "version": "2024-v1",
+      "sourceUrl": "https://www.fdaghana.gov.gh",
+      "lastReviewedAt": "2026-01-15T00:00:00.000Z",
+      "reviewedBy": "Dr. K. Mensah, Clinical Reviewer"
+    }
+  },
+  {
+    "id": "GH-MED-006",
+    "genericName": "Amoxicillin",
+    "brandNames": ["Amoxil", "Moxatag", "Trimox", "Penamox"],
+    "therapeuticClass": "Aminopenicillin Antibacterial",
+    "classification": "prescription_only",
+    "approvedIndications": [
+      "Treatment of susceptible bacterial infections (e.g. otitis media, streptococcal pharyngitis, community-acquired pneumonia, urinary tract infections)"
+    ],
+    "contraindications": [
+      {
+        "condition": "Severe hypersensitivity / anaphylaxis to penicillins or beta-lactams",
+        "explanation": "Risk of life-threatening anaphylactic shock, laryngeal edema, or severe cutaneous reactions.",
+        "severity": "critical"
+      },
+      {
+        "condition": "Infectious mononucleosis (glandular fever)",
+        "explanation": "High incidence of generalized maculopapular rash when given during EBV infection.",
+        "severity": "warning"
+      }
+    ],
+    "ageRestrictions": {
+      "minAgeYears": 0,
+      "warning": "Pediatric formulation and weight-based dosing must be verified by a medical doctor or clinical pharmacist."
+    },
+    "pregnancyPrecautions": {
+      "isContraindicated": false,
+      "warning": "Generally considered acceptable during pregnancy when clinically indicated. Must be prescribed by a physician."
+    },
+    "interactions": [
+      {
+        "medicineOrClass": "Methotrexate",
+        "effect": "Amoxicillin reduces methotrexate renal clearance, increasing methotrexate toxicity risk.",
+        "severity": "major"
+      },
+      {
+        "medicineOrClass": "Allopurinol",
+        "effect": "Increased risk of skin rashes.",
+        "severity": "moderate"
+      }
+    ],
+    "commonSideEffects": [
+      "Diarrhea, nausea, loose stools",
+      "Mild skin rash"
+    ],
+    "administrationWarnings": [
+      "PRESCRIPTION ONLY: Antibiotics must never be taken without a formal clinical examination and valid prescription.",
+      "Amoxicillin is completely ineffective against viral infections such as colds, flu, or simple viral coughs.",
+      "Complete the entire prescribed duration to prevent antimicrobial resistance.",
+      "Clinix does not prescribe or calculate doses for antibiotics."
+    ],
+    "dosageDisclaimer": "Dosage must be determined solely by an authorized medical practitioner. Clinix does not calculate antibiotic dosages.",
+    "referenceSource": {
+      "name": "Ghana MoH Standard Treatment Guidelines / WHO Essential Medicines",
+      "jurisdiction": "GH",
+      "version": "2024-v1",
+      "sourceUrl": "https://www.fdaghana.gov.gh",
+      "lastReviewedAt": "2026-01-15T00:00:00.000Z",
+      "reviewedBy": "Dr. K. Mensah, Clinical Reviewer"
+    }
+  },
+  {
+    "id": "GH-MED-007",
+    "genericName": "Magnesium Trisilicate Compound",
+    "brandNames": ["Andrews Liver Salt", "Gestid", "Gelusil", "Asilone", "Magsil"],
+    "therapeuticClass": "Antacid and Antiflatulent",
+    "classification": "over_the_counter",
+    "approvedIndications": [
+      "Symptomatic relief of acid indigestion, heartburn, and dyspepsia"
+    ],
+    "contraindications": [
+      {
+        "condition": "Severe renal failure",
+        "explanation": "Risk of hypermagnesemia and aluminum accumulation.",
+        "severity": "critical"
+      },
+      {
+        "condition": "Suspected appendicitis or gastrointestinal perforation",
+        "explanation": "Antacids mask acute surgical abdomen signs.",
+        "severity": "critical"
+      }
+    ],
+    "ageRestrictions": {
+      "minAgeYears": 6,
+      "warning": "Not recommended for children under 6 years without medical consultation."
+    },
+    "pregnancyPrecautions": {
+      "isContraindicated": false,
+      "warning": "Generally considered acceptable for short-term heartburn in pregnancy, but avoid high chronic doses. Consult a midwife or doctor."
+    },
+    "interactions": [
+      {
+        "medicineOrClass": "Ciprofloxacin / Tetracycline / Fluoroquinolone antibiotics",
+        "effect": "Antacids bind antibiotics in the stomach, severely preventing their absorption. Space apart by at least 2 hours.",
+        "severity": "major"
+      },
+      {
+        "medicineOrClass": "Oral Iron supplements",
+        "effect": "Decreased iron absorption. Space by at least 2 hours.",
+        "severity": "moderate"
+      }
+    ],
+    "commonSideEffects": [
+      "Mild diarrhea (magnesium) or constipation (aluminum)",
+      "Belching or bloating"
+    ],
+    "administrationWarnings": [
+      "Chew tablets thoroughly before swallowing or mix powder with water as directed.",
+      "Do not take within 2 hours of taking other oral medications.",
+      "If heartburn or indigestion persists for more than 14 days, see a doctor to rule out ulcer disease or cardiac causes."
+    ],
+    "dosageDisclaimer": "Follow packaging instructions. Consult your pharmacist if symptoms recur frequently.",
+    "referenceSource": {
+      "name": "Ghana MoH Standard Treatment Guidelines",
+      "jurisdiction": "GH",
+      "version": "2024-v1",
+      "sourceUrl": "https://www.fdaghana.gov.gh",
+      "lastReviewedAt": "2026-01-15T00:00:00.000Z",
+      "reviewedBy": "Dr. K. Mensah, Clinical Reviewer"
+    }
+  },
+  {
+    "id": "GH-MED-008",
+    "genericName": "Aspirin (Acetylsalicylic Acid)",
+    "brandNames": ["Disprin", "Aspro", "Ecotrin", "Bayer Aspirin"],
+    "therapeuticClass": "Salicylate Analgesic, Antipyretic and Antiplatelet",
+    "classification": "over_the_counter",
+    "approvedIndications": [
+      "Adult relief of mild to moderate pain and headache",
+      "Cardiovascular secondary prevention (low-dose under medical supervision only)"
+    ],
+    "contraindications": [
+      {
+        "condition": "Children and teenagers under 16 years of age",
+        "explanation": "Strictly contraindicated due to the risk of Reye's syndrome—a rare but potentially fatal condition causing acute encephalopathy and liver fatty degeneration.",
+        "severity": "critical"
+      },
+      {
+        "condition": "Active peptic ulceration or bleeding disorders",
+        "explanation": "Irreversible platelet inhibition significantly worsens hemorrhage.",
+        "severity": "critical"
+      },
+      {
+        "condition": "Third trimester of pregnancy",
+        "explanation": "Risk of maternal and fetal bleeding and delayed labor.",
+        "severity": "critical"
+      }
+    ],
+    "ageRestrictions": {
+      "minAgeYears": 16,
+      "warning": "DO NOT GIVE TO CHILDREN OR ADOLESCENTS UNDER 16 YEARS due to the established risk of Reye's syndrome."
+    },
+    "pregnancyPrecautions": {
+      "isContraindicated": true,
+      "warning": "High-dose analgesic aspirin is contraindicated in pregnancy, especially during the 3rd trimester. Low-dose preventive aspirin is strictly by specialist obstetric prescription."
+    },
+    "interactions": [
+      {
+        "medicineOrClass": "Warfarin / Heparin / Anticoagulants",
+        "effect": "Massively elevated risk of major gastrointestinal and cerebral bleeding.",
+        "severity": "major"
+      },
+      {
+        "medicineOrClass": "Ibuprofen / other NSAIDs",
+        "effect": "Increased risk of gastric ulceration; interferes with antiplatelet benefit.",
+        "severity": "major"
+      }
+    ],
+    "commonSideEffects": [
+      "Stomach irritation, nausea, indigestion",
+      "Increased bleeding tendency"
+    ],
+    "administrationWarnings": [
+      "Strictly prohibited in patients under 16 years of age with viral infections or fever.",
+      "Take after meals with a full glass of water.",
+      "Discontinue and seek urgent medical evaluation if tinnitus (ringing in ears) or black tarry stools develop."
+    ],
+    "dosageDisclaimer": "Clinix does not calculate dosages. Always check the packaging leaflet and consult a registered pharmacist.",
+    "referenceSource": {
+      "name": "Ghana MoH Standard Treatment Guidelines / British Pharmacopoeia",
+      "jurisdiction": "GH",
+      "version": "2024-v1",
+      "sourceUrl": "https://www.fdaghana.gov.gh",
+      "lastReviewedAt": "2026-01-15T00:00:00.000Z",
+      "reviewedBy": "Dr. K. Mensah, Clinical Reviewer"
+    }
+  },
+  {
+    "id": "GH-MED-009",
+    "genericName": "Metronidazole",
+    "brandNames": ["Flagyl", "Metrogyl", "Trichozole"],
+    "therapeuticClass": "Nitroimidazole Antimicrobial / Antiprotozoal",
+    "classification": "prescription_only",
+    "approvedIndications": [
+      "Treatment of susceptible anaerobic bacterial infections and protozoal infections (e.g. amoebiasis, giardiasis, trichomoniasis)"
+    ],
+    "contraindications": [
+      {
+        "condition": "Severe hypersensitivity to metronidazole or nitroimidazoles",
+        "explanation": "Risk of acute hypersensitivity reactions.",
+        "severity": "critical"
+      },
+      {
+        "condition": "Concurrent alcohol consumption",
+        "explanation": "Causes a severe disulfiram-like reaction (flushing, throbbing headache, palpitations, vomiting, hypotension).",
+        "severity": "critical"
+      }
+    ],
+    "ageRestrictions": {
+      "minAgeYears": 0.1,
+      "warning": "Pediatric use requires specific weight-based clinician calculation."
+    },
+    "pregnancyPrecautions": {
+      "isContraindicated": true,
+      "warning": "Avoid during the first trimester of pregnancy unless considered essential by an obstetrician. Consult your doctor."
+    },
+    "interactions": [
+      {
+        "medicineOrClass": "Alcohol (and alcohol-containing medicines)",
+        "effect": "Severe disulfiram-like reaction (acute tachycardia, violent vomiting, severe hypotension). Avoid alcohol during and for 48 hours after treatment.",
+        "severity": "major"
+      },
+      {
+        "medicineOrClass": "Warfarin",
+        "effect": "Significantly potentiates anticoagulant effect of warfarin, increasing bleeding risk.",
+        "severity": "major"
+      }
+    ],
+    "commonSideEffects": [
+      "Unpleasant metallic taste in the mouth",
+      "Nausea, epigastric discomfort",
+      "Darkened or reddish-brown urine (harmless)"
+    ],
+    "administrationWarnings": [
+      "PRESCRIPTION ONLY: Requires clinical diagnosis and prescription by a licensed practitioner.",
+      "Strictly avoid all alcohol during treatment and for at least 48 hours after the last dose.",
+      "Take with or after food with a full glass of water."
+    ],
+    "dosageDisclaimer": "Requires prescription and weight/clinical indication determination by a clinician. Clinix does not calculate doses.",
+    "referenceSource": {
+      "name": "Ghana MoH Standard Treatment Guidelines / WHO Model List",
+      "jurisdiction": "GH",
+      "version": "2024-v1",
+      "sourceUrl": "https://www.fdaghana.gov.gh",
+      "lastReviewedAt": "2026-01-15T00:00:00.000Z",
+      "reviewedBy": "Dr. K. Mensah, Clinical Reviewer"
+    }
+  },
+  {
+    "id": "GH-MED-010",
+    "genericName": "Chlorpheniramine",
+    "brandNames": ["Piriton", "Allercalm", "Cafenol Cold"],
+    "therapeuticClass": "First-Generation Alkylamine Antihistamine",
+    "classification": "over_the_counter",
+    "approvedIndications": [
+      "Symptomatic relief of allergic reactions, insect bites, acute urticaria, allergic rhinitis"
+    ],
+    "contraindications": [
+      {
+        "condition": "Narrow-angle glaucoma or urinary retention (e.g. prostatic hypertrophy)",
+        "explanation": "Anticholinergic effects can precipitate acute glaucoma or acute urinary retention.",
+        "severity": "critical"
+      },
+      {
+        "condition": "Use with Monoamine Oxidase Inhibitors (MAOIs)",
+        "explanation": "Potentiates anticholinergic and CNS depressant effects.",
+        "severity": "critical"
+      }
+    ],
+    "ageRestrictions": {
+      "minAgeYears": 1,
+      "warning": "Not recommended for children under 1 year of age without direct pediatrician supervision."
+    },
+    "pregnancyPrecautions": {
+      "isContraindicated": false,
+      "warning": "Use only if clearly needed and advised by a medical doctor. May cause neonatal irritability or tremors if taken in late pregnancy."
+    },
+    "interactions": [
+      {
+        "medicineOrClass": "Alcohol, Sedatives, Hypnotics",
+        "effect": "Produces additive CNS depression, causing profound drowsiness and decreased reflexes.",
+        "severity": "major"
+      }
+    ],
+    "commonSideEffects": [
+      "Drowsiness, sedation, impaired concentration",
+      "Dry mouth, blurred vision"
+    ],
+    "administrationWarnings": [
+      "Causes marked drowsiness: DO NOT drive, ride a bicycle, or operate machinery while taking this medicine.",
+      "Avoid alcoholic beverages entirely.",
+      "Keep strictly out of reach of children."
+    ],
+    "dosageDisclaimer": "Consult product packaging leaflet or speak with your pharmacist for age-appropriate guidance.",
+    "referenceSource": {
+      "name": "Ghana MoH Standard Treatment Guidelines",
+      "jurisdiction": "GH",
+      "version": "2024-v1",
+      "sourceUrl": "https://www.fdaghana.gov.gh",
+      "lastReviewedAt": "2026-01-15T00:00:00.000Z",
+      "reviewedBy": "Dr. K. Mensah, Clinical Reviewer"
+    }
+  }
+]
