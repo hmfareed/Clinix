@@ -34,6 +34,9 @@ export function Navbar() {
             <Link href="/symptom-checker" className="transition hover:text-teal-600 dark:hover:text-teal-400 font-semibold">
               Symptom Checker
             </Link>
+            <Link href="/clinics" className="transition hover:text-teal-600 dark:hover:text-teal-400">
+              Nearby Care
+            </Link>
             <Link href="/about" className="transition hover:text-teal-600 dark:hover:text-teal-400">
               About & Safety
             </Link>

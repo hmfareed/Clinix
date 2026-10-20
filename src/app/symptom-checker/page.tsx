@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   HeartPulse,
   PhoneCall,
+  MapPin,
   Send,
   AlertTriangle,
   ShieldAlert,
@@ -692,10 +693,19 @@ export default function SymptomCheckerPage() {
 
           {/* ACTION BUTTONS */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
-            <Button variant="outline" size="sm" onClick={() => window.print()} className="w-full sm:w-auto flex items-center gap-1.5 text-xs">
-              <Printer className="h-4 w-4" />
-              <span>Print or Save Summary</span>
-            </Button>
+            <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+              <Button variant="outline" size="sm" onClick={() => window.print()} className="w-full sm:w-auto flex items-center gap-1.5 text-xs">
+                <Printer className="h-4 w-4" />
+                <span>Print or Save Summary</span>
+              </Button>
+
+              <Link href="/clinics" className="w-full sm:w-auto">
+                <Button variant="outline" size="sm" className="w-full flex items-center gap-1.5 text-xs text-teal-700 dark:text-teal-400">
+                  <MapPin className="h-4 w-4 text-teal-600" />
+                  <span>Find Nearby Clinics & Hospitals</span>
+                </Button>
+              </Link>
+            </div>
 
             <Button variant="default" size="sm" onClick={handleReset} className="w-full sm:w-auto flex items-center gap-1.5 text-xs">
               <RotateCcw className="h-4 w-4" />

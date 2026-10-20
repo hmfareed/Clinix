@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:safety": "vitest run src/tests/safety",
-    "test:eval": "vitest run src/tests/ai"
+    "test:eval": "vitest run src/tests/ai",
+    "test:maps": "vitest run src/tests/maps"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
