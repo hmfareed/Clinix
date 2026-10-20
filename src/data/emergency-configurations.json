@@ -1,0 +1,47 @@
+[
+  {
+    "countryCode": "GH",
+    "countryName": "Ghana",
+    "emergencyNumber": "112",
+    "serviceName": "Ghana National Ambulance Service",
+    "isVerified": true,
+    "lastVerifiedAt": "2026-10-01T00:00:00.000Z",
+    "notes": "Nationwide 24/7 service operated by the National Ambulance Service of Ghana."
+  },
+  {
+    "countryCode": "NG",
+    "countryName": "Nigeria",
+    "emergencyNumber": "112",
+    "serviceName": "National Emergency Management Agency",
+    "isVerified": true,
+    "lastVerifiedAt": "2026-10-01T00:00:00.000Z",
+    "notes": "Unified nationwide emergency response number."
+  },
+  {
+    "countryCode": "KE",
+    "countryName": "Kenya",
+    "emergencyNumber": "112",
+    "serviceName": "Kenya National Police and Emergency Services",
+    "isVerified": true,
+    "lastVerifiedAt": "2026-10-01T00:00:00.000Z",
+    "notes": "Toll-free emergency line."
+  },
+  {
+    "countryCode": "GB",
+    "countryName": "United Kingdom",
+    "emergencyNumber": "999",
+    "serviceName": "NHS Emergency Ambulance Service",
+    "isVerified": true,
+    "lastVerifiedAt": "2026-10-01T00:00:00.000Z",
+    "notes": "Standard national emergency number; 112 also routes to 999."
+  },
+  {
+    "countryCode": "US",
+    "countryName": "United States",
+    "emergencyNumber": "911",
+    "serviceName": "Emergency Services",
+    "isVerified": true,
+    "lastVerifiedAt": "2026-10-01T00:00:00.000Z",
+    "notes": "Standard nationwide emergency dispatch number."
+  }
+]
