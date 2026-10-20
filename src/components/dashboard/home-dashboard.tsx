@@ -164,44 +164,7 @@ export function HomeDashboard() {
 
   return (
     <div className="space-y-4 sm:space-y-4.5 animate-in fade-in duration-200 bg-black text-slate-100 max-w-6xl mx-auto">
-      {/* 1. COMPACT HERO / WELCOME BANNER (Height ~130px) */}
-      <section className="relative overflow-hidden rounded-2xl border border-zinc-800/80 bg-gradient-to-r from-zinc-950 via-zinc-900/80 to-zinc-950 px-5 py-4 sm:px-6 sm:py-5 shadow-xl">
-        <div className="absolute -right-12 -top-12 h-44 w-44 rounded-full bg-blue-600/10 blur-2xl pointer-events-none" />
-
-        <div className="relative z-10 flex items-center justify-between gap-4">
-          {/* Welcome Text & CTA */}
-          <div className="max-w-lg space-y-1 sm:space-y-1.5">
-            <span className="text-xs font-semibold tracking-wide text-blue-400">
-              Hi {displayName},
-            </span>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-black tracking-tight text-white leading-tight">
-              How can we help you today?
-            </h1>
-            <p className="text-xs text-zinc-400 leading-normal line-clamp-2 max-w-md">
-              Describe what you&apos;re feeling, and our AI will guide you with the next best steps.
-            </p>
-            <div className="pt-1">
-              <button
-                onClick={handleStartTriage}
-                className="inline-flex items-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-500 active:bg-blue-700 px-4 py-2 text-xs font-bold text-white shadow-md shadow-blue-600/25 transition-all duration-150 hover:scale-[1.02] active:scale-[0.98]"
-              >
-                <span>Check My Symptoms</span>
-                <ArrowRight className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Compact 3D Shield Illustration */}
-          <div className="relative hidden xs:flex items-center justify-center shrink-0">
-            <div className="absolute h-28 w-28 rounded-full bg-blue-500/15 blur-xl" />
-            <div className="relative flex h-20 w-20 sm:h-24 sm:w-24 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-600/30 border border-blue-400/30">
-              <Activity className="h-9 w-9 sm:h-10 sm:w-10 animate-pulse" />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 2. COMPACT FOUR PRIMARY FEATURE CARDS (4-Column Grid, Height ~100px) */}
+      {/* 1. FOUR PRIMARY FEATURE CARDS (4-Column Grid) */}
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-3.5">
         {/* Card 1: Symptom Checker */}
         <Link
