@@ -7,6 +7,7 @@ import { logAuditEvent } from "@/lib/audit/audit";
 import { auth } from "@/lib/auth/auth";
 import { connectToDatabase } from "@/lib/db/mongodb";
 import Assessment from "@/models/Assessment";
+import { isFeatureEnabled } from "@/lib/governance/feature-flags";
 
 const assessRequestSchema = z.object({
   sessionId: z.string().optional(),
@@ -56,6 +57,22 @@ export async function POST(req: NextRequest) {
         },
       },
       { status: 429, headers: rateLimitHeaders }
+    );
+  }
+
+  // 1. Feature Flag Kill Switch Check
+  const aiEnabled = await isFeatureEnabled("ai_assessment_enabled");
+  if (!aiEnabled) {
+    return NextResponse.json(
+      {
+        error: {
+          code: "FEATURE_DISABLED",
+          message: "The AI symptom assessment engine has been temporarily disabled by administrative safety control.",
+          safeAction: "For acute symptoms or distress, please dial 112 immediately or visit the nearest clinic.",
+          requestId,
+        },
+      },
+      { status: 503, headers: rateLimitHeaders }
     );
   }
 

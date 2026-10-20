@@ -4,6 +4,7 @@ import { z } from "zod";
 import { defaultMedicationService } from "@/services/medication-service";
 import { checkRateLimit } from "@/lib/security/rate-limit";
 import { auth } from "@/lib/auth/auth";
+import { isFeatureEnabled } from "@/lib/governance/feature-flags";
 
 const patientContextSchema = z.object({
   ageYears: z.number().min(0).max(125).optional(),
@@ -63,6 +64,21 @@ export async function POST(req: NextRequest) {
         },
       },
       { status: 429, headers: rateLimitHeaders }
+    );
+  }
+
+  // Feature Flag Kill Switch Check
+  const medEnabled = await isFeatureEnabled("medication_module_enabled");
+  if (!medEnabled) {
+    return NextResponse.json(
+      {
+        error: {
+          code: "FEATURE_DISABLED",
+          message: "The medication guidance module has been temporarily paused by administrative safety control. Please consult a registered pharmacist.",
+          requestId,
+        },
+      },
+      { status: 503, headers: rateLimitHeaders }
     );
   }
 
