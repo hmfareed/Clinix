@@ -316,9 +316,14 @@ export function HomeDashboard() {
                 Your Health Assistant
               </h2>
             </div>
-            <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-950/70 border border-emerald-800/50 px-2 py-0.5 rounded-full">
-              Live & Protected
-            </span>
+            <div className="flex items-center gap-2">
+              <Link
+                href="/assistant"
+                className="text-[11px] font-semibold text-teal-400 hover:text-teal-300 flex items-center gap-1 bg-teal-950/60 border border-teal-800/40 px-2 py-0.5 rounded-full transition"
+              >
+                Open Full Assistant <ArrowRight className="h-3 w-3" />
+              </Link>
+            </div>
           </div>
 
           {/* Conversational Stream */}

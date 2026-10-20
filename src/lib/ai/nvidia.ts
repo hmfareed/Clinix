@@ -34,4 +34,4 @@ export function getNvidiaClient(): OpenAI {
 }
 
 export const MODEL = process.env.NVIDIA_MODEL || DEFAULT_MODEL;
-export const FALLBACK_MODEL = process.env.NVIDIA_FALLBACK_MODEL || "openai/gpt-oss-20b";
+export const FALLBACK_MODEL = process.env.NVIDIA_FALLBACK_MODEL || "meta/llama-3.2-90b-vision-instruct";

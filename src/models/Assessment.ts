@@ -4,6 +4,7 @@ import { UrgencyTier } from "@/lib/safety/types";
 export interface IAssessment extends Document {
   patientId: mongoose.Types.ObjectId;
   sessionId?: mongoose.Types.ObjectId;
+  conversationId?: mongoose.Types.ObjectId;
   symptoms: Array<{
     description: string;
     onset?: string;
@@ -50,6 +51,12 @@ const AssessmentSchema = new Schema<IAssessment>(
       type: Schema.Types.ObjectId,
       ref: "AssessmentSession",
       required: false,
+    },
+    conversationId: {
+      type: Schema.Types.ObjectId,
+      ref: "AssistantConversation",
+      required: false,
+      index: true,
     },
     symptoms: [
       {

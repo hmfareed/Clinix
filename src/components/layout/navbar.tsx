@@ -31,7 +31,10 @@ export function Navbar() {
             <Link href="/" className="transition hover:text-teal-600 dark:hover:text-teal-400">
               Home
             </Link>
-            <Link href="/symptom-checker" className="transition hover:text-teal-600 dark:hover:text-teal-400 font-semibold">
+            <Link href="/assistant" className="transition text-teal-700 dark:text-teal-400 hover:text-teal-600 font-semibold">
+              AI Assistant
+            </Link>
+            <Link href="/symptom-checker" className="transition hover:text-teal-600 dark:hover:text-teal-400">
               Symptom Checker
             </Link>
             <Link href="/medications" className="transition hover:text-teal-600 dark:hover:text-teal-400">
