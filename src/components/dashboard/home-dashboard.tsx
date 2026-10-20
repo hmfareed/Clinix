@@ -28,6 +28,10 @@ interface Message {
   sender: "assistant" | "user";
   text: string;
   isEmergency?: boolean;
+  urgency?: "emergency" | "urgent" | "routine" | "self_care_eligible";
+  followUps?: string[];
+  recommendations?: string[];
+  possibleCauses?: Array<{ condition: string; probability?: string; rationale?: string }>;
 }
 
 export function HomeDashboard() {
@@ -41,6 +45,7 @@ export function HomeDashboard() {
   // Health Assistant Interactive State
   const [symptomInput, setSymptomInput] = React.useState("");
   const [isTyping, setIsTyping] = React.useState(false);
+  const chatEndRef = React.useRef<HTMLDivElement>(null);
 
   const displayName = session?.user?.name
     ? session.user.name.split(" ")[0]
@@ -55,6 +60,10 @@ export function HomeDashboard() {
       text: `Hello ${displayName}! I'm your AI health assistant. Tell me what's wrong, and I'll help you find the possible cause, suggest next steps, and guide you to the right care.`,
     },
   ]);
+
+  React.useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isTyping]);
 
   function handleStartTriage() {
     setShowConsent(true);
@@ -77,7 +86,7 @@ export function HomeDashboard() {
   // Handle Quick Chips or User Input
   async function handleSendQuery(textToSend?: string) {
     const text = (textToSend || symptomInput).trim();
-    if (!text) return;
+    if (!text || isTyping) return;
 
     const userMsg: Message = {
       id: `u-${Date.now()}`,
@@ -85,11 +94,12 @@ export function HomeDashboard() {
       text,
     };
 
-    setMessages((prev) => [...prev, userMsg]);
+    const newMessages = [...messages, userMsg];
+    setMessages(newMessages);
     setSymptomInput("");
     setIsTyping(true);
 
-    // Rule-based Emergency Screening (Section 4.3 & 5 Step 3)
+    // Rule-based Emergency Screening (Client Fast-Gate)
     const lower = text.toLowerCase();
     const isEmergency =
       lower.includes("chest pain") ||
@@ -109,43 +119,77 @@ export function HomeDashboard() {
             id: `a-${Date.now()}`,
             sender: "assistant",
             isEmergency: true,
-            text: "EMERGENCY WARNING: Symptoms such as severe chest pain, breathing difficulty, or signs of stroke require immediate emergency medical care. Please do not wait for an automated chat. Call emergency services right now.",
+            urgency: "emergency",
+            text: "EMERGENCY WARNING: Severe symptoms like chest pain, severe breathing difficulty, or signs of stroke require immediate in-person emergency care. Please do not wait for an automated chat. Call emergency dispatch immediately.",
+            recommendations: [
+              "Call 112 immediately or proceed to the nearest emergency facility.",
+              "Do not attempt to drive yourself if experiencing acute distress or chest pain.",
+            ],
           },
         ]);
         setShowEmergencyModal(true);
-      }, 350);
+      }, 300);
       return;
     }
+
+    // Prepare conversation history matching API schema
+    const conversationHistory = newMessages
+      .filter((m) => m.id !== "m-0")
+      .map((m) => ({
+        role: m.sender === "user" ? ("patient" as const) : ("assistant" as const),
+        content: m.text,
+      }));
 
     try {
       const res = await fetch("/api/ai/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: [{ role: "user", content: text }],
-          turn: 1,
+          message: text,
+          symptoms: text,
+          conversationHistory,
         }),
       });
 
-      const data = await res.json();
+      const json = await res.json();
       setIsTyping(false);
 
-      if (res.ok && data.message) {
+      if (res.ok && json.data) {
+        const data = json.data;
+        const urgency = data.urgency;
+        const isEmerg = urgency === "emergency";
+        const replyText =
+          data.reply ||
+          data.summary ||
+          "I have assessed your symptoms against clinical safety and triage protocols.";
+
         setMessages((prev) => [
           ...prev,
           {
             id: `a-${Date.now()}`,
             sender: "assistant",
-            text: data.message,
+            text: replyText,
+            isEmergency: isEmerg,
+            urgency,
+            followUps: data.followUpQuestions,
+            recommendations: data.recommendedNextSteps,
+            possibleCauses: data.possibleConditions,
           },
         ]);
+
+        if (isEmerg) {
+          setShowEmergencyModal(true);
+        }
       } else {
+        const fallbackText =
+          json.error?.message ||
+          "I understand your symptoms. For an accurate clinical risk assessment and recommended next steps, please start a full symptom check.";
         setMessages((prev) => [
           ...prev,
           {
             id: `a-${Date.now()}`,
             sender: "assistant",
-            text: "I understand your symptoms. For an accurate, multi-step clinical assessment and recommended next steps, please start a full symptom check.",
+            text: fallbackText,
           },
         ]);
       }
@@ -156,7 +200,7 @@ export function HomeDashboard() {
         {
           id: `a-${Date.now()}`,
           sender: "assistant",
-          text: "Thank you for sharing your symptoms. To get personalized guidance and potential explanations, please tap 'Check My Symptoms' to begin your full assessment.",
+          text: "Thank you for sharing your symptoms. To get personalized clinical triage and locate nearby verified facilities, please start a full symptom check.",
         },
       ]);
     }
@@ -277,9 +321,9 @@ export function HomeDashboard() {
             </span>
           </div>
 
-          {/* Conversational Stream (Compact height) */}
+          {/* Conversational Stream */}
           <div
-            className="space-y-2.5 max-h-[140px] sm:max-h-[160px] overflow-y-auto pr-1"
+            className="space-y-2.5 max-h-[200px] sm:max-h-[240px] overflow-y-auto pr-1"
             role="log"
             aria-live="polite"
           >
@@ -296,17 +340,76 @@ export function HomeDashboard() {
                   </div>
                 )}
                 <div
-                  className={`max-w-[85%] rounded-xl p-2.5 sm:p-3 text-xs leading-relaxed ${
+                  className={`max-w-[85%] rounded-xl p-2.5 sm:p-3 text-xs leading-relaxed space-y-2 ${
                     msg.isEmergency
-                      ? "bg-red-950/60 text-red-200 border border-red-800/80 font-medium"
+                      ? "bg-red-950/70 text-red-100 border border-red-800/80 font-medium"
                       : msg.sender === "user"
                       ? "bg-blue-600 text-white rounded-br-xs"
                       : "bg-zinc-900 text-zinc-200 border border-zinc-800/80 rounded-tl-xs"
                   }`}
                 >
-                  {msg.text}
-                  {msg.isEmergency && (
-                    <div className="mt-2">
+                  {/* Urgency Badge */}
+                  {msg.urgency && (
+                    <div className="flex items-center gap-1.5 pb-0.5">
+                      <span
+                        className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
+                          msg.urgency === "emergency"
+                            ? "bg-red-900/80 border-red-700 text-red-200"
+                            : msg.urgency === "urgent"
+                            ? "bg-amber-950/80 border-amber-800 text-amber-300"
+                            : msg.urgency === "routine"
+                            ? "bg-blue-950/80 border-blue-800 text-blue-300"
+                            : "bg-emerald-950/80 border-emerald-800 text-emerald-300"
+                        }`}
+                      >
+                        {msg.urgency === "emergency" && "Emergency Action Required"}
+                        {msg.urgency === "urgent" && "Urgent Care Recommended"}
+                        {msg.urgency === "routine" && "Scheduled Evaluation"}
+                        {msg.urgency === "self_care_eligible" && "Self-Care Eligible"}
+                      </span>
+                    </div>
+                  )}
+
+                  <p>{msg.text}</p>
+
+                  {/* Differential Possibilities */}
+                  {msg.possibleCauses && msg.possibleCauses.length > 0 && (
+                    <div className="rounded-lg bg-black/60 p-2 border border-zinc-800/80 space-y-1">
+                      <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block">
+                        Possible Considerations (Differential):
+                      </span>
+                      <div className="space-y-1">
+                        {msg.possibleCauses.slice(0, 3).map((cause, idx) => (
+                          <div key={idx} className="flex items-center justify-between text-[11px]">
+                            <span className="text-zinc-200 font-medium">{cause.condition}</span>
+                            {cause.probability && (
+                              <span className="text-[9px] text-zinc-400 capitalize px-1.5 py-0.5 bg-zinc-900 rounded border border-zinc-800">
+                                {cause.probability}
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Recommended Next Steps */}
+                  {msg.recommendations && msg.recommendations.length > 0 && (
+                    <div className="rounded-lg bg-black/40 p-2 border border-zinc-800/60 space-y-1">
+                      <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block">
+                        Recommended Next Steps:
+                      </span>
+                      <ul className="list-disc list-inside text-[11px] text-zinc-300 space-y-0.5">
+                        {msg.recommendations.slice(0, 2).map((rec, idx) => (
+                          <li key={idx}>{rec}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Action buttons & Links */}
+                  {msg.isEmergency ? (
+                    <div className="pt-1">
                       <a
                         href="tel:112"
                         className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 text-white px-3 py-1.5 text-xs font-bold shadow hover:bg-red-500"
@@ -314,6 +417,43 @@ export function HomeDashboard() {
                         <PhoneCall className="h-3 w-3 animate-bounce" />
                         <span>Dial 112 Emergency Dispatch Now</span>
                       </a>
+                    </div>
+                  ) : msg.urgency ? (
+                    <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-zinc-800/60">
+                      <Link
+                        href="/clinics"
+                        className="inline-flex items-center gap-1 rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-2 py-1 text-[11px] font-medium transition"
+                      >
+                        <MapPin className="h-3 w-3 text-teal-400" />
+                        <span>Find Nearby Clinics</span>
+                      </Link>
+                      <Link
+                        href="/symptom-checker"
+                        className="inline-flex items-center gap-1 rounded-md bg-blue-600 hover:bg-blue-500 text-white px-2 py-1 text-[11px] font-medium transition"
+                      >
+                        <Stethoscope className="h-3 w-3" />
+                        <span>Full Assessment</span>
+                      </Link>
+                    </div>
+                  ) : null}
+
+                  {/* Follow-up Question Chips */}
+                  {msg.followUps && msg.followUps.length > 0 && (
+                    <div className="pt-1 space-y-1">
+                      <span className="text-[10px] text-zinc-400 font-medium block">
+                        Suggested follow-up:
+                      </span>
+                      <div className="flex flex-wrap gap-1">
+                        {msg.followUps.slice(0, 2).map((q, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => handleSendQuery(q)}
+                            className="text-left rounded-lg bg-blue-950/70 border border-blue-800/60 hover:bg-blue-900/80 text-blue-300 text-[11px] px-2.5 py-1 transition-colors"
+                          >
+                            💬 {q}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -326,10 +466,11 @@ export function HomeDashboard() {
                   <Activity className="h-3 w-3 animate-spin" />
                 </div>
                 <div className="rounded-xl bg-zinc-900 border border-zinc-800 px-3 py-1.5 text-[11px] text-zinc-400">
-                  <span className="animate-pulse">Analyzing symptoms against safety catalog...</span>
+                  <span className="animate-pulse">Consulting LLaMA 3.1 & clinical safety engine...</span>
                 </div>
               </div>
             )}
+            <div ref={chatEndRef} />
           </div>
 
           {/* Compact Input Box */}

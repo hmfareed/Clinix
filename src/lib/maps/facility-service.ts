@@ -1,5 +1,6 @@
 import { Facility, SearchFacilitiesParams, IMapsProvider } from "./types";
 import { defaultGhanaDirectoryProvider } from "./ghana-directory-provider";
+import { defaultGoogleMapsProvider } from "./google-maps-provider";
 import { connectToDatabase } from "@/lib/db/mongodb";
 import FacilityCache from "@/models/FacilityCache";
 import mongoose from "mongoose";
@@ -7,7 +8,11 @@ import mongoose from "mongoose";
 export class FacilityService {
   private readonly provider: IMapsProvider;
 
-  constructor(provider: IMapsProvider = defaultGhanaDirectoryProvider) {
+  constructor(
+    provider: IMapsProvider = process.env.GOOGLE_MAPS_API_KEY
+      ? defaultGoogleMapsProvider
+      : defaultGhanaDirectoryProvider
+  ) {
     this.provider = provider;
   }
 
