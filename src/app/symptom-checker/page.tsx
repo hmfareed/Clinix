@@ -477,7 +477,12 @@ export default function SymptomCheckerPage() {
             </Button>
           </CardHeader>
 
-          <CardContent className="space-y-4 pt-4 max-h-[500px] overflow-y-auto">
+          <CardContent
+            className="space-y-4 pt-4 max-h-[500px] overflow-y-auto"
+            role="log"
+            aria-live="polite"
+            aria-label="Assessment conversation history"
+          >
             {conversation.map((msg, idx) => (
               <div
                 key={idx}

@@ -54,10 +54,11 @@ export function Navbar() {
           {/* Emergency Fast Dial - Always accessible */}
           <a
             href="tel:112"
-            className="flex items-center gap-2 rounded-lg bg-red-600 px-3.5 py-2 text-xs sm:text-sm font-bold text-white shadow transition hover:bg-red-700 active:bg-red-800"
+            className="flex items-center gap-2 rounded-lg bg-red-600 px-3.5 py-2 text-xs sm:text-sm font-bold text-white shadow transition hover:bg-red-700 active:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2"
             title="Immediate emergency call to 112"
+            aria-label="Immediate emergency call to 112 national ambulance service"
           >
-            <PhoneCall className="h-4 w-4 animate-bounce" />
+            <PhoneCall className="h-4 w-4 animate-bounce" aria-hidden="true" />
             <span>Emergency: 112</span>
           </a>
 
