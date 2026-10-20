@@ -36,10 +36,7 @@ export default function HomePage() {
     try {
       const res = await fetch("/api/auth/guest", { method: "POST" });
       if (res.ok) {
-        // In phase 1, guest session cookie is established.
-        alert(
-          "Guest session initialized successfully! Symptom checker conversation will be enabled in Phase 3."
-        );
+        router.push("/symptom-checker");
       } else {
         alert("Could not initialize guest session. Please try again.");
       }
