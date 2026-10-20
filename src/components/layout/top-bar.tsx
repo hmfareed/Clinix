@@ -61,25 +61,25 @@ export function TopBar({ onOpenMobileMenu }: TopBarProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-20 flex h-20 w-full items-center justify-between border-b border-zinc-900 bg-black/90 backdrop-blur-md px-4 sm:px-8 text-slate-100">
+      <header className="sticky top-0 z-20 flex h-16 w-full items-center justify-between border-b border-zinc-900 bg-black/90 backdrop-blur-md px-4 sm:px-6 text-slate-100">
         {/* Left Side: Mobile Menu Button & Global Search Trigger */}
-        <div className="flex items-center gap-3 sm:gap-4 flex-1 max-w-xl">
+        <div className="flex items-center gap-2.5 sm:gap-3 flex-1 max-w-lg">
           <button
             onClick={onOpenMobileMenu}
-            className="lg:hidden rounded-xl p-2 text-zinc-400 hover:bg-zinc-900 hover:text-white"
+            className="lg:hidden rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-900 hover:text-white"
             aria-label="Open navigation menu"
           >
-            <Menu className="h-6 w-6" />
+            <Menu className="h-5 w-5" />
           </button>
 
           {/* Search Bar matching screenshot */}
           <button
             onClick={() => setSearchOpen(true)}
-            className="group flex w-full items-center gap-3 rounded-2xl bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 px-4 py-2.5 text-left text-sm text-zinc-400 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            className="group flex w-full items-center gap-2.5 rounded-xl bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 px-3.5 py-1.5 sm:py-2 text-left text-xs sm:text-sm text-zinc-400 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
           >
-            <Search className="h-4 w-4 text-zinc-400 group-hover:text-blue-400 transition-colors shrink-0" />
+            <Search className="h-3.5 w-3.5 text-zinc-400 group-hover:text-blue-400 transition-colors shrink-0" />
             <span className="truncate">Search symptoms, medications, clinics...</span>
-            <kbd className="ml-auto hidden md:inline-block rounded-md border border-zinc-800 bg-zinc-900 px-2 py-0.5 text-[10px] font-mono text-zinc-400">
+            <kbd className="ml-auto hidden md:inline-block rounded border border-zinc-800 bg-zinc-900 px-1.5 py-0.5 text-[9px] font-mono text-zinc-400">
               Ctrl K
             </kbd>
           </button>
