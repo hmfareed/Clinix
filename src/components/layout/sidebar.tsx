@@ -13,7 +13,6 @@ import {
   ShieldCheck,
   X,
   Activity,
-  HeartPulse,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -75,7 +74,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   }
 
   const sidebarContent = (
-    <div className="flex h-full flex-col justify-between bg-white px-5 py-6 dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800">
+    <div className="flex h-full flex-col justify-between bg-black px-5 py-6 border-r border-zinc-900/90 text-slate-100">
       <div className="space-y-8">
         {/* Brand Header */}
         <div className="flex items-center justify-between">
@@ -85,7 +84,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             className="flex items-center gap-3 transition-opacity hover:opacity-95 group"
           >
             {/* Custom Modern Healthcare Emblem */}
-            <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 text-white shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform duration-200">
+            <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 text-white shadow-md shadow-blue-500/30 group-hover:scale-105 transition-transform duration-200">
               <Activity className="h-5 w-5" />
               <div className="absolute -top-1 -right-1 flex h-3 w-3">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75"></span>
@@ -93,10 +92,10 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
               </div>
             </div>
             <div>
-              <span className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+              <span className="text-2xl font-black tracking-tight text-white">
                 Clinix
               </span>
-              <p className="text-[11px] font-medium text-slate-400 dark:text-slate-400 -mt-0.5">
+              <p className="text-[11px] font-medium text-zinc-400 -mt-0.5">
                 Clarity when every decision matters.
               </p>
             </div>
@@ -106,7 +105,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           {onClose && (
             <button
               onClick={onClose}
-              className="lg:hidden rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
+              className="lg:hidden rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-900 hover:text-white"
               aria-label="Close menu"
             >
               <X className="h-5 w-5" />
@@ -126,26 +125,26 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 onClick={onClose}
                 className={`group flex items-center gap-3.5 rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-150 ${
                   active
-                    ? "bg-blue-50 text-blue-600 shadow-xs dark:bg-blue-950/40 dark:text-blue-400"
+                    ? "bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-xs shadow-blue-500/10"
                     : item.isEmergency
-                    ? "text-slate-600 hover:bg-red-50/70 hover:text-red-600 dark:text-slate-300 dark:hover:bg-red-950/30 dark:hover:text-red-400"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/60 dark:hover:text-white"
+                    ? "text-zinc-400 hover:bg-red-950/40 hover:text-red-400 hover:border hover:border-red-900/40"
+                    : "text-zinc-400 hover:bg-zinc-900/80 hover:text-white"
                 }`}
               >
                 <div
                   className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
                     active
-                      ? "text-blue-600 dark:text-blue-400"
+                      ? "text-blue-400"
                       : item.isEmergency
                       ? "text-red-500 group-hover:scale-110 transition-transform"
-                      : "text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200"
+                      : "text-zinc-500 group-hover:text-zinc-200"
                   }`}
                 >
                   <Icon className="h-5 w-5" />
                 </div>
                 <span>{item.name}</span>
                 {item.isEmergency && (
-                  <span className="ml-auto rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-600 dark:bg-red-950/60 dark:text-red-300">
+                  <span className="ml-auto rounded-full bg-red-950/70 border border-red-800/60 px-2 py-0.5 text-[10px] font-bold text-red-400">
                     112
                   </span>
                 )}
@@ -157,16 +156,16 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
       {/* Bottom Trust & Security Card */}
       <div className="pt-6">
-        <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+        <div className="rounded-2xl border border-zinc-900 bg-zinc-950/90 p-4 shadow-sm">
           <div className="flex items-start gap-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-950/80 border border-emerald-800/40 text-emerald-400">
               <ShieldCheck className="h-4 w-4" />
             </div>
             <div>
-              <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
+              <p className="text-xs font-bold text-zinc-200">
                 Your data is secure
               </p>
-              <p className="mt-1 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+              <p className="mt-1 text-[11px] leading-relaxed text-zinc-500">
                 We use enterprise-grade security to protect your information.
               </p>
             </div>
@@ -186,7 +185,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* Mobile Drawer Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 lg:hidden bg-slate-950/60 backdrop-blur-xs transition-opacity"
+          className="fixed inset-0 z-50 lg:hidden bg-black/80 backdrop-blur-sm transition-opacity"
           onClick={onClose}
         >
           <div
