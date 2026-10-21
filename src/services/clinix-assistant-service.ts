@@ -48,6 +48,9 @@ import {
 import { getEmergencyConfiguration } from "@/lib/emergency/emergency-config";
 import { defaultMedicationService } from "@/services/medication-service";
 import { defaultFacilityService } from "@/lib/maps/facility-service";
+import { defaultHealthcarePlacesService } from "@/lib/healthcare-places/places-service";
+import { defaultGeocodeService } from "@/lib/healthcare-places/geocode-service";
+import { formatDistance } from "@/lib/healthcare-places/distance";
 import { assessSymptoms } from "@/services/assessment-service";
 
 export interface AssistantAuthContext {
@@ -60,6 +63,12 @@ export interface SendMessageInput {
   message: string;
   clientMessageId?: string;
   authContext: AssistantAuthContext;
+  locationContext?: {
+    latitude: number;
+    longitude: number;
+    radiusMeters?: number;
+    locationName?: string;
+  };
 }
 
 export interface AssistantTurnResult {
@@ -211,7 +220,7 @@ export class ClinixAssistantService {
    */
   async processPatientMessage(input: SendMessageInput): Promise<AssistantTurnResult> {
     await connectToDatabase();
-    const { conversationId, message, clientMessageId, authContext } = input;
+    const { conversationId, message, clientMessageId, authContext, locationContext } = input;
 
     const cleanMessage = message.trim();
     if (!cleanMessage) {
@@ -281,6 +290,10 @@ export class ClinixAssistantService {
       const emergencyResponse: StructuredAssistantResponse = {
         intent: "emergency_assistance",
         state: "escalated",
+        conversationStage: "escalated",
+        awaitingPatientResponse: false,
+        nextQuestion: null,
+        urgencyLevel: "emergency",
         message:
           emergencySafety.patientMessage ||
           "POTENTIAL MEDICAL EMERGENCY DETECTED: Your described symptoms indicate a potential life-threatening emergency. Please seek immediate professional medical attention without delay.",
@@ -356,7 +369,7 @@ export class ClinixAssistantService {
 
     switch (intent) {
       case "clinic_search": {
-        structuredResponse = await this.handleClinicSearch(cleanMessage);
+        structuredResponse = await this.handleClinicSearch(cleanMessage, locationContext);
         break;
       }
 
@@ -391,14 +404,12 @@ export class ClinixAssistantService {
         structuredResponse = {
           intent: "clarification_required",
           state: conversation.currentState === "idle" ? "idle" : conversation.currentState,
+          conversationStage: "collecting_symptoms",
+          awaitingPatientResponse: true,
+          nextQuestion: "Are you experiencing specific symptoms, looking for information on a medication, or trying to find a nearby clinic?",
           message:
             "Hello! I am your Clinix health care navigation assistant. To help you best, could you please tell me: are you experiencing specific symptoms, looking for information on a medication, or trying to find a nearby clinic?",
-          followUpQuestion: {
-            id: "clarify_primary_need",
-            text: "What would you like to do?",
-            type: "single_choice",
-            options: ["Check my symptoms", "Look up a medication", "Find a nearby clinic", "Ask a general health question"],
-          },
+          followUpQuestion: null,
           safety: { urgentPathwayTriggered: false, ruleIds: [] },
           actions: [
             { id: "action_symptoms", label: "Describe Symptoms", type: "action", target: "symptom_assessment" },
@@ -436,7 +447,7 @@ export class ClinixAssistantService {
       guestTokenHash: authContext.guestTokenHash,
       role: "assistant",
       content: structuredResponse.message,
-      responseType: structuredResponse.followUpQuestion
+      responseType: structuredResponse.awaitingPatientResponse || structuredResponse.followUpQuestion
         ? "follow_up_question"
         : structuredResponse.intent === "clinic_search"
         ? "clinic_info"
@@ -477,23 +488,78 @@ export class ClinixAssistantService {
   }
 
   /**
-   * Handles verified clinic/facility discovery workflow
+   * Handles verified clinic/facility discovery workflow using real places provider
    */
-  private async handleClinicSearch(query: string): Promise<StructuredAssistantResponse> {
+  private async handleClinicSearch(
+    query: string,
+    locationContext?: {
+      latitude: number;
+      longitude: number;
+      radiusMeters?: number;
+      locationName?: string;
+    }
+  ): Promise<StructuredAssistantResponse> {
     try {
-      const facilities = await defaultFacilityService.searchFacilities({
-        query: query.slice(0, 100),
-        limit: 3,
+      let searchLat: number | undefined = locationContext?.latitude;
+      let searchLng: number | undefined = locationContext?.longitude;
+      let locationLabel: string | undefined = locationContext?.locationName;
+      const radiusMeters = locationContext?.radiusMeters || 5000;
+
+      // If locationContext is not provided, check if the patient mentioned a location in their query text
+      if (searchLat === undefined || searchLng === undefined) {
+        const geocodeResult = await defaultGeocodeService.geocode({ query });
+        if (geocodeResult && geocodeResult.provider !== "fallback_regional_center") {
+          searchLat = geocodeResult.latitude;
+          searchLng = geocodeResult.longitude;
+          locationLabel = geocodeResult.displayName;
+        }
+      }
+
+      // If no coordinates are known yet, request location permission from the patient
+      if (searchLat === undefined || searchLng === undefined) {
+        return {
+          intent: "clinic_search",
+          state: "idle",
+          message:
+            "To find nearby hospitals and clinics, Clinix needs access to your device location or the name of your town or neighbourhood. Please tap **Use My Location** below or enter your area.",
+          followUpQuestion: null,
+          safety: { urgentPathwayTriggered: false, ruleIds: [] },
+          clinicSearchPrompt: {
+            active: true,
+            defaultRadiusMeters: 5000,
+          },
+          actions: [
+            { id: "use_location", label: "Use My Location", type: "action", target: "request_location" },
+            { id: "browse_all_clinics", label: "Open Clinic Directory", type: "link", target: "/clinics" },
+          ],
+          sources: [{ id: "ghana_health_service", title: "Ghana Health Service Verified Facilities" }],
+        };
+      }
+
+      // Query healthcare places provider
+      const placesResponse = await defaultHealthcarePlacesService.searchNearby({
+        latitude: searchLat,
+        longitude: searchLng,
+        radiusMeters,
+        limit: 5,
       });
+
+      const facilities = placesResponse.facilities;
+      const radiusKm = Math.round(radiusMeters / 1000);
 
       if (facilities.length === 0) {
         return {
           intent: "clinic_search",
           state: "idle",
-          message:
-            "I could not locate specific facilities matching that query in the verified directory. You can browse all verified healthcare clinics and hospitals in our full care directory.",
+          message: `I could not locate verified healthcare facilities within ${radiusKm} km of ${locationLabel || "your location"}. You can try expanding your search radius or browsing our complete directory.`,
           followUpQuestion: null,
           safety: { urgentPathwayTriggered: false, ruleIds: [] },
+          clinicSearchPrompt: {
+            active: true,
+            defaultRadiusMeters: radiusMeters,
+            detectedLocationName: locationLabel,
+          },
+          facilityResults: [],
           actions: [
             { id: "browse_all_clinics", label: "Open Clinic Directory", type: "link", target: "/clinics" },
           ],
@@ -501,37 +567,57 @@ export class ClinixAssistantService {
         };
       }
 
+      // Format facility summaries strictly from verified data
       const facilitySummaries = facilities
-        .map(
-          (f, idx) =>
-            `${idx + 1}. **${f.name}** (${f.type.replace("_", " ")}): ${f.address}${
-              f.phone ? ` • Phone: ${f.phone}` : ""
-            }`
-        )
+        .slice(0, 3)
+        .map((f, idx) => {
+          const distStr = f.distanceMeters !== undefined ? ` (${formatDistance(f.distanceMeters)})` : "";
+          const openStr =
+            f.openNow !== undefined && f.openNow !== null
+              ? f.openNow
+                ? " • Open now"
+                : " • Currently closed"
+              : "";
+          const phoneStr = f.phoneNumber ? ` • Tel: ${f.phoneNumber}` : "";
+          return `${idx + 1}. **${f.name}**${distStr}\n   ${f.formattedAddress}${openStr}${phoneStr}`;
+        })
         .join("\n\n");
+
+      const areaDesc = locationLabel ? ` near **${locationLabel}**` : " near your location";
 
       return {
         intent: "clinic_search",
         state: "idle",
-        message: `Here are verified healthcare facilities near that area:\n\n${facilitySummaries}\n\n*Please verify operating hours before traveling for routine care.*`,
+        message: `Here are verified healthcare facilities${areaDesc} within ${radiusKm} km:\n\n${facilitySummaries}\n\n*Please verify operating hours before traveling for routine care. In life-threatening emergencies, call 112 immediately.*`,
         followUpQuestion: null,
         safety: { urgentPathwayTriggered: false, ruleIds: [] },
+        facilityResults: facilities,
+        clinicSearchPrompt: {
+          active: true,
+          defaultRadiusMeters: radiusMeters,
+          detectedLocationName: locationLabel,
+        },
         actions: [
           { id: "view_on_map", label: "View Detailed Map", type: "link", target: "/clinics" },
-          ...(facilities[0]?.phone
+          ...(facilities[0]?.phoneNumber
             ? [
                 {
                   id: "call_facility",
                   label: `Call ${facilities[0].name}`,
                   type: "call" as const,
-                  target: `tel:${facilities[0].phone}`,
+                  target: `tel:${facilities[0].phoneNumber}`,
                 },
               ]
             : []),
         ],
-        sources: [{ id: "facility_directory", title: "Clinix Verified Healthcare Directory" }],
+        sources: [
+          placesResponse.provider === "google_places_new"
+            ? { id: "google_places", title: "Google Places Healthcare Directory" }
+            : { id: "ghana_health_service", title: "Ghana Health Service Verified Facilities" },
+        ],
       };
-    } catch {
+    } catch (err) {
+      console.error("[CLINIC SEARCH ERROR]", err);
       return {
         intent: "clinic_search",
         state: "idle",
@@ -754,12 +840,14 @@ export class ClinixAssistantService {
       return {
         intent: "symptom_assessment",
         state: "asking_questions",
-        message: `I understand you're experiencing: *"${message}"*\n\nTo help me understand your situation better and guide you to the right care, I have a few focused questions. I'll ask them one at a time.\n\n📋 **Symptom pathway detected:** ${pathwayDef.label}`,
+        conversationStage: "asking_follow_up",
+        awaitingPatientResponse: true,
+        nextQuestion: firstQ.text,
+        message: `I'm sorry you're experiencing that. I'd like to ask a few questions to better understand your symptoms.\n\n${firstQ.text}`,
         followUpQuestion: {
           id: firstQ.id,
           text: firstQ.text,
           type: firstQ.type,
-          options: firstQ.options,
         },
         safety: { urgentPathwayTriggered: false, ruleIds: [] },
         actions: [],
@@ -796,6 +884,10 @@ export class ClinixAssistantService {
       return {
         intent: "emergency_assistance",
         state: "escalated",
+        conversationStage: "escalated",
+        awaitingPatientResponse: false,
+        nextQuestion: null,
+        urgencyLevel: "emergency",
         message:
           reevaluatedSafety.patientMessage ||
           "⚠️ **EMERGENCY WARNING:** Your updated symptoms indicate potential critical warning signs. Please call emergency services immediately.",
@@ -924,6 +1016,12 @@ export class ClinixAssistantService {
       return {
         intent: "symptom_assessment",
         state: "presenting_result",
+        conversationStage: "presenting_guidance",
+        awaitingPatientResponse: false,
+        nextQuestion: null,
+        assessmentSummary: clinicalResult.summary,
+        nextSteps: clinicalResult.recommendedNextSteps,
+        urgencyLevel: clinicalResult.urgency,
         message: `**Assessment Complete**\n\n**Urgency Level:** ${urgencyLabel}\n\n**Summary:** ${clinicalResult.summary}${possibleCausesText}${stepsText}${medicationText}\n\n---\n*⚕️ This is health navigation guidance — not a medical diagnosis. Always consult a qualified healthcare professional. If symptoms worsen, seek care immediately.*`,
         followUpQuestion: null,
         safety: {
@@ -971,12 +1069,14 @@ export class ClinixAssistantService {
     return {
       intent: "assessment_follow_up",
       state: "asking_questions",
-      message: `Thank you for that detail.${progressLabel}`,
+      conversationStage: "asking_follow_up",
+      awaitingPatientResponse: true,
+      nextQuestion: nextQ.text,
+      message: `Thank you for explaining.${progressLabel ? " " + progressLabel : ""}\n\n${nextQ.text}`,
       followUpQuestion: {
         id: nextQ.id,
         text: nextQ.text,
         type: nextQ.type,
-        options: nextQ.options,
       },
       safety: { urgentPathwayTriggered: false, ruleIds: [] },
       actions: [],

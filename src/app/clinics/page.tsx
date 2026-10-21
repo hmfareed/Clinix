@@ -132,19 +132,19 @@ export default function ClinicsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 text-zinc-100">
       {/* Emergency Header Fast Call Banner */}
-      <div className="mb-8 rounded-xl border border-red-200 bg-red-50 p-4 text-xs dark:border-red-950 dark:bg-red-950/40">
+      <div className="mb-8 rounded-xl border border-red-900/60 bg-red-950/40 p-4 text-xs">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <PhoneCall className="h-4 w-4 text-red-600 animate-pulse shrink-0" />
-            <span className="font-semibold text-red-900 dark:text-red-200">
+            <PhoneCall className="h-4 w-4 text-red-500 animate-pulse shrink-0" />
+            <span className="font-semibold text-red-200">
               Medical Emergency? Call the Ghana National Ambulance Service directly.
             </span>
           </div>
           <a
             href="tel:112"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3.5 py-1.5 font-bold text-white shadow hover:bg-red-700"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3.5 py-1.5 font-bold text-white shadow-sm hover:bg-red-500 transition cursor-pointer"
           >
             <span>Call 112 Immediately</span>
           </a>
@@ -153,34 +153,34 @@ export default function ClinicsPage() {
 
       {/* Main Title & Search Header */}
       <div className="mb-8">
-        <div className="inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-800 dark:border-teal-900 dark:bg-teal-950 dark:text-teal-300 mb-2">
-          <MapPin className="h-4 w-4" />
+        <div className="inline-flex items-center gap-2 rounded-full border border-teal-500/30 bg-teal-950/60 px-3 py-1 text-xs font-semibold text-teal-300 mb-2">
+          <MapPin className="h-4 w-4 text-teal-400" />
           <span>Verified Care Navigation</span>
         </div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
+        <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
           Find Nearby Healthcare Facilities
         </h1>
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+        <p className="mt-2 text-sm text-zinc-400">
           Search verified hospitals, emergency departments, clinics, and 24-hour pharmacies across Ghana.
         </p>
       </div>
 
       {/* Search & Location Bar */}
-      <Card className="mb-8 shadow-sm">
+      <Card className="mb-8 shadow-sm border border-zinc-800 bg-zinc-950 text-zinc-100">
         <CardContent className="p-4 sm:p-6 space-y-4">
           <div className="flex flex-col sm:flex-row items-center gap-3">
             <form onSubmit={handleSearchSubmit} className="flex flex-1 items-center gap-2 w-full">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                <Search className="absolute left-3 top-3 h-4 w-4 text-zinc-500" />
                 <Input
                   type="text"
                   placeholder="Enter city, town, or area in Ghana (e.g. Accra, Kumasi, Osu)..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9"
+                  className="pl-9 bg-zinc-900 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-teal-500"
                 />
               </div>
-              <Button type="submit" variant="default" disabled={loading}>
+              <Button type="submit" variant="default" disabled={loading} className="bg-teal-600 hover:bg-teal-500 text-white font-semibold cursor-pointer">
                 Search
               </Button>
             </form>
@@ -189,28 +189,28 @@ export default function ClinicsPage() {
               variant="outline"
               onClick={handleRequestGeolocation}
               disabled={geolocating}
-              className="w-full sm:w-auto flex items-center gap-2 shrink-0 text-xs"
+              className="w-full sm:w-auto flex items-center gap-2 shrink-0 text-xs border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 cursor-pointer"
             >
-              <Navigation className="h-4 w-4 text-teal-600" />
+              <Navigation className="h-4 w-4 text-teal-400" />
               <span>{geolocating ? "Locating..." : "Use My GPS Location"}</span>
             </Button>
           </div>
 
           {locationPermissionState === "denied" && (
-            <p className="text-xs text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
-              <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+            <p className="text-xs text-amber-400 flex items-center gap-1.5">
+              <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-amber-400" />
               <span>Location access was denied. You can select your town manually below.</span>
             </p>
           )}
 
           {/* Quick Town Selectors */}
-          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
-            <span className="text-slate-500 font-medium">Popular Regions:</span>
+          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-zinc-800/80 text-xs">
+            <span className="text-zinc-400 font-medium">Popular Regions:</span>
             {GHANA_POPULAR_TOWNS.map((t) => (
               <button
                 key={t.name}
                 onClick={() => handleSelectTown(t)}
-                className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-teal-950 dark:hover:text-teal-400 cursor-pointer"
+                className="rounded-full bg-zinc-900 border border-zinc-800 px-3 py-1 text-xs font-medium text-zinc-300 hover:bg-teal-950/70 hover:border-teal-700/60 hover:text-teal-300 transition cursor-pointer"
               >
                 {t.name}
               </button>
@@ -234,7 +234,7 @@ export default function ClinicsPage() {
             className={`flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
               selectedType === key
                 ? "bg-teal-600 text-white shadow-sm"
-                : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-800 dark:hover:bg-slate-800"
+                : "bg-zinc-900 text-zinc-300 border border-zinc-800 hover:bg-zinc-800 hover:text-white"
             }`}
           >
             <Icon className="h-3.5 w-3.5" />
@@ -245,23 +245,23 @@ export default function ClinicsPage() {
 
       {/* ERROR / DEGRADED STATE */}
       {errorState && (
-        <Card className="mb-8 border-red-200 bg-red-50/60 dark:border-red-900 dark:bg-red-950/20">
+        <Card className="mb-8 border-red-900/60 bg-red-950/30 text-zinc-100">
           <CardContent className="p-6">
             <div className="flex items-start gap-3">
-              <AlertTriangle className="h-6 w-6 text-red-600 shrink-0" />
+              <AlertTriangle className="h-6 w-6 text-red-500 shrink-0" />
               <div className="space-y-2">
-                <h3 className="text-base font-bold text-red-900 dark:text-red-200">
+                <h3 className="text-base font-bold text-red-200">
                   {errorState.message}
                 </h3>
                 {errorState.safeAction && (
-                  <p className="text-xs text-red-800 dark:text-red-300">{errorState.safeAction}</p>
+                  <p className="text-xs text-red-300">{errorState.safeAction}</p>
                 )}
                 {errorState.externalUrl && (
                   <a
                     href={errorState.externalUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-700 underline hover:text-teal-800 dark:text-teal-400"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-400 underline hover:text-teal-300"
                   >
                     <span>Search on Google Maps</span>
                     <ExternalLink className="h-3 w-3" />
@@ -276,16 +276,16 @@ export default function ClinicsPage() {
       {/* FACILITIES LIST */}
       {loading ? (
         <div className="flex min-h-[300px] flex-col items-center justify-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
-          <p className="text-xs text-slate-500">Searching verified healthcare facilities...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-teal-500" />
+          <p className="text-xs text-zinc-400">Searching verified healthcare facilities...</p>
         </div>
       ) : facilities.length === 0 ? (
-        <Card className="p-8 text-center text-slate-500">
-          <Building2 className="mx-auto h-12 w-12 text-slate-400 mb-3" />
-          <h3 className="text-base font-bold text-slate-700 dark:text-slate-300">
+        <Card className="p-8 text-center border-zinc-800 bg-zinc-950 text-zinc-400">
+          <Building2 className="mx-auto h-12 w-12 text-zinc-600 mb-3" />
+          <h3 className="text-base font-bold text-zinc-200">
             No facilities found matching your criteria.
           </h3>
-          <p className="mt-1 text-xs">
+          <p className="mt-1 text-xs text-zinc-400">
             Try adjusting your search radius, selecting "All Facilities", or choosing another town.
           </p>
         </Card>
@@ -297,7 +297,7 @@ export default function ClinicsPage() {
             return (
               <Card
                 key={facility.providerId}
-                className="flex flex-col justify-between shadow-sm hover:shadow-md transition border-slate-200 dark:border-slate-800"
+                className="flex flex-col justify-between shadow-sm hover:shadow-md transition border-zinc-800/80 bg-zinc-950 text-zinc-100"
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between gap-2">
@@ -315,51 +315,51 @@ export default function ClinicsPage() {
                     </Badge>
 
                     {facility.distanceKm !== undefined && (
-                      <span className="text-xs font-bold text-teal-600 dark:text-teal-400 flex items-center gap-1">
+                      <span className="text-xs font-bold text-teal-400 flex items-center gap-1">
                         <Navigation className="h-3 w-3" />
                         {facility.distanceKm} km
                       </span>
                     )}
                   </div>
 
-                  <CardTitle className="text-base font-bold text-slate-900 dark:text-white mt-2 leading-snug">
+                  <CardTitle className="text-base font-bold text-white mt-2 leading-snug">
                     {facility.name}
                   </CardTitle>
 
                   {facility.address && (
-                    <CardDescription className="text-xs flex items-start gap-1.5 mt-1">
-                      <MapPin className="h-3.5 w-3.5 shrink-0 text-slate-400 mt-0.5" />
+                    <CardDescription className="text-xs flex items-start gap-1.5 mt-1 text-zinc-400">
+                      <MapPin className="h-3.5 w-3.5 shrink-0 text-zinc-500 mt-0.5" />
                       <span>{facility.address}</span>
                     </CardDescription>
                   )}
                 </CardHeader>
 
-                <CardContent className="space-y-2 text-xs text-slate-600 dark:text-slate-300 py-2 border-y border-slate-100 dark:border-slate-800">
+                <CardContent className="space-y-2 text-xs text-zinc-300 py-2 border-y border-zinc-800/80">
                   {/* Hours */}
                   <div className="flex items-center gap-2">
-                    <Clock className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                    <Clock className="h-3.5 w-3.5 text-zinc-500 shrink-0" />
                     <span>
                       {facility.hours?.known ? (
-                        <span className="font-medium text-emerald-700 dark:text-emerald-400">
+                        <span className="font-medium text-emerald-400">
                           {facility.hours.text}
                         </span>
                       ) : (
-                        <span className="text-slate-400 italic">Opening hours unknown</span>
+                        <span className="text-zinc-500 italic">Opening hours unknown</span>
                       )}
                     </span>
                   </div>
 
                   {/* Phone */}
                   <div className="flex items-center gap-2">
-                    <PhoneCall className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                    <PhoneCall className="h-3.5 w-3.5 text-zinc-500 shrink-0" />
                     <span>
                       {facility.phone ? (
-                        <span className="font-mono">{facility.phone}</span>
+                        <span className="font-mono text-zinc-200">{facility.phone}</span>
                       ) : (
-                        <span className="text-slate-400 italic">No phone number available</span>
+                        <span className="text-zinc-500 italic">No phone number available</span>
                       )}
                       {facility.phoneVerified && (
-                        <span className="ml-1.5 text-[10px] text-teal-600 font-semibold">✓ Verified</span>
+                        <span className="ml-1.5 text-[10px] text-teal-400 font-semibold">✓ Verified</span>
                       )}
                     </span>
                   </div>
@@ -371,7 +371,7 @@ export default function ClinicsPage() {
                         {facility.services.slice(0, 3).map((srv, idx) => (
                           <span
                             key={idx}
-                            className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                            className="rounded bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 text-[10px] text-zinc-400"
                           >
                             {srv}
                           </span>
@@ -386,7 +386,7 @@ export default function ClinicsPage() {
                     {facility.phone ? (
                       <a
                         href={`tel:${facility.phone}`}
-                        className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-teal-600 px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-teal-700 transition"
+                        className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-teal-600 px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-teal-500 transition cursor-pointer"
                       >
                         <PhoneCall className="h-3.5 w-3.5" />
                         <span>Call</span>
@@ -397,16 +397,16 @@ export default function ClinicsPage() {
                       href={directionsUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-800 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 transition"
+                      className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs font-bold text-zinc-200 shadow-sm hover:bg-zinc-800 hover:text-white transition cursor-pointer"
                     >
-                      <Navigation className="h-3.5 w-3.5 text-teal-600" />
+                      <Navigation className="h-3.5 w-3.5 text-teal-400" />
                       <span>Directions</span>
                     </a>
                   </div>
                 </CardFooter>
 
                 {/* Source Provenance Footer */}
-                <div className="px-6 pb-3 text-[10px] text-slate-400 flex items-center justify-between">
+                <div className="px-6 pb-3 text-[10px] text-zinc-500 flex items-center justify-between">
                   <span>Source: {facility.source}</span>
                   {facility.lastVerifiedAt && (
                     <span>Verified: {new Date(facility.lastVerifiedAt).toLocaleDateString()}</span>

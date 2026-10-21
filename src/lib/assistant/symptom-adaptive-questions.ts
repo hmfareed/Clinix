@@ -237,16 +237,8 @@ const FEVER_SYSTEMIC_QUESTIONS: AdaptiveFollowUpQuestion[] = [
 
 const HEADACHE_NEURO_QUESTIONS: AdaptiveFollowUpQuestion[] = [
   {
-    id: "head_location",
-    text: "Where is the headache located?",
-    type: "single_choice",
-    options: ["Entire head", "Front (forehead / behind the eyes)", "One side only", "Back of the head", "Top of the head", "Not sure"],
-    category: "location",
-    required: true,
-  },
-  {
     id: "head_onset",
-    text: "How did the headache start?",
+    text: "Did your headache start suddenly and become extremely severe, or did it develop gradually?",
     type: "single_choice",
     options: ["Suddenly — like a thunderclap", "Gradually over minutes to hours", "Slowly over a day or more", "Not sure"],
     category: "onset",
@@ -254,15 +246,15 @@ const HEADACHE_NEURO_QUESTIONS: AdaptiveFollowUpQuestion[] = [
   },
   {
     id: "head_severity",
-    text: "How severe is the headache right now?",
+    text: "How severe is the headache on a scale of 1 to 10, where 10 is the worst pain imaginable?",
     type: "single_choice",
-    options: ["Mild — manageable", "Moderate — hard to concentrate", "Severe — worst headache of my life", "Varies"],
+    options: ["Mild (1–3)", "Moderate (4–6)", "Severe (7–9)", "Worst pain imaginable (10)"],
     category: "severity",
     required: true,
   },
   {
     id: "head_associated",
-    text: "Are you experiencing any of the following with the headache?",
+    text: "Are you experiencing any other warning signs such as a stiff neck, high fever, confusion, difficulty speaking, or weakness?",
     type: "single_choice",
     options: ["Fever and neck stiffness", "Vomiting or nausea", "Sensitivity to light or sound", "Vision changes or blurry vision", "None of these"],
     category: "associated",
@@ -275,6 +267,14 @@ const HEADACHE_NEURO_QUESTIONS: AdaptiveFollowUpQuestion[] = [
     options: ["Less than 4 hours", "4 to 24 hours", "1 to 3 days", "More than 3 days (recurring)"],
     category: "duration",
     required: true,
+  },
+  {
+    id: "head_location",
+    text: "Where is the headache located?",
+    type: "single_choice",
+    options: ["Entire head", "Front (forehead / behind the eyes)", "One side only", "Back of the head", "Top of the head", "Not sure"],
+    category: "location",
+    required: false,
   },
 ];
 

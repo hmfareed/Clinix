@@ -11,6 +11,14 @@ const messageInputSchema = z.object({
     .min(1, "Message cannot be empty")
     .max(2000, "Message is too long (maximum 2000 characters)"),
   clientMessageId: z.string().max(128).optional(),
+  locationContext: z
+    .object({
+      latitude: z.number().min(-90).max(90),
+      longitude: z.number().min(-180).max(180),
+      radiusMeters: z.number().min(500).max(25000).optional(),
+      locationName: z.string().max(120).optional(),
+    })
+    .optional(),
 });
 
 export async function POST(
@@ -85,6 +93,7 @@ export async function POST(
       conversationId,
       message: parseResult.data.message,
       clientMessageId: parseResult.data.clientMessageId,
+      locationContext: parseResult.data.locationContext,
       authContext,
     });
 

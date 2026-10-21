@@ -33,6 +33,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { ConsentModal } from "@/components/consent/consent-modal";
 import { AssessmentResultCard } from "@/components/assistant/AssessmentResultCard";
+import { HealthcareFinderWidget } from "@/components/chat/healthcare-finder-widget";
 import {
   StructuredAssistantResponse,
   FollowUpQuestion,
@@ -523,26 +524,21 @@ export function ClinixAssistant() {
                   </div>
                 )}
 
-                {/* Structured Follow-Up Question Chips */}
-                {followUp && followUp.options && followUp.options.length > 0 && (
-                  <div className="mt-3.5 pt-3 border-t border-slate-100 dark:border-slate-800/80">
-                    <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">
-                      {followUp.text}
-                    </p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {followUp.options.map((opt) => (
-                        <button
-                          key={opt}
-                          type="button"
-                          onClick={() => handleSendMessage(opt)}
-                          className="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-teal-50 dark:bg-teal-950/50 text-teal-800 dark:text-teal-200 border border-teal-200 dark:border-teal-800/60 hover:bg-teal-100 dark:hover:bg-teal-900/60 transition cursor-pointer"
-                        >
-                          {opt}
-                        </button>
-                      ))}
+                {/* Healthcare Facility Discovery Widget */}
+                {!isPatient &&
+                  (msg.intent === "clinic_search" ||
+                    msg.structuredPayload?.clinicSearchPrompt?.active ||
+                    (msg.structuredPayload?.facilityResults && msg.structuredPayload.facilityResults.length > 0)) && (
+                    <div className="mt-3.5">
+                      <HealthcareFinderWidget
+                        initialFacilities={msg.structuredPayload?.facilityResults || []}
+                        initialLocationName={msg.structuredPayload?.clinicSearchPrompt?.detectedLocationName}
+                        defaultRadiusMeters={msg.structuredPayload?.clinicSearchPrompt?.defaultRadiusMeters || 5000}
+                      />
                     </div>
-                  </div>
-                )}
+                  )}
+
+
 
                 {/* Action Buttons */}
                 {actions.filter((a) => !a.id.startsWith("nearby_clinic_")).length > 0 && (

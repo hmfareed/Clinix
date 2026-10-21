@@ -219,6 +219,31 @@ Hope this helps!`;
       expect(result.message).toContain("Clinix");
       expect(result.followUpQuestions.length).toBeGreaterThan(0);
       expect(result.possibleConditions).toHaveLength(0); // No premature differential on a greeting!
+      expect(result.conversationStage).toBe("collecting_symptoms");
+      expect(result.awaitingPatientResponse).toBe(true);
+      expect(result.nextQuestion).toBeTruthy();
+    });
+
+    it("represents conversational stage and waiting state explicitly", async () => {
+      const result = await assessSymptoms({
+        symptoms: "Hello there",
+      });
+
+      expect(result.conversationStage).toBe("collecting_symptoms");
+      expect(result.awaitingPatientResponse).toBe(true);
+      expect(typeof result.nextQuestion).toBe("string");
+    });
+
+    it("sets conversationStage to escalated and awaitingPatientResponse to false on emergency", async () => {
+      const result = await assessSymptoms({
+        symptoms: "I have sudden thunderclap headache, worst pain of my life and vomiting",
+      });
+
+      expect(result.urgency).toBe("emergency");
+      expect(result.conversationStage).toBe("escalated");
+      expect(result.awaitingPatientResponse).toBe(false);
+      expect(result.nextQuestion).toBeNull();
+      expect(result.recommendedNextSteps[0]).toMatch(/112|emergency/i);
     });
   });
 });

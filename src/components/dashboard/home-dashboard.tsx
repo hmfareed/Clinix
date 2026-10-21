@@ -23,6 +23,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { ConsentModal } from "@/components/consent/consent-modal";
+import { HealthcareFinderWidget } from "@/components/chat/healthcare-finder-widget";
 
 interface Message {
   id: string;
@@ -41,6 +42,12 @@ interface Message {
   }>;
   redFlags?: string[];
   disclaimer?: string;
+  facilityResults?: any[];
+  clinicSearchPrompt?: {
+    active: boolean;
+    defaultRadiusMeters?: number;
+    detectedLocationName?: string;
+  };
 }
 
 export function HomeDashboard() {
@@ -249,6 +256,8 @@ export function HomeDashboard() {
             possibleCauses: validCauses,
             redFlags: validRedFlags,
             disclaimer: data.disclaimer,
+            facilityResults: data.facilityResults,
+            clinicSearchPrompt: data.clinicSearchPrompt,
           },
         ]);
 
@@ -555,6 +564,19 @@ export function HomeDashboard() {
                     </p>
                   )}
 
+                  {/* Healthcare Facilities Discovery Widget */}
+                  {msg.sender === "assistant" &&
+                    (msg.clinicSearchPrompt?.active ||
+                      (msg.facilityResults && msg.facilityResults.length > 0)) && (
+                      <div className="pt-2">
+                        <HealthcareFinderWidget
+                          initialFacilities={msg.facilityResults || []}
+                          initialLocationName={msg.clinicSearchPrompt?.detectedLocationName}
+                          defaultRadiusMeters={msg.clinicSearchPrompt?.defaultRadiusMeters || 5000}
+                        />
+                      </div>
+                    )}
+
                   {/* Action buttons & Links */}
                   {msg.isEmergency ? (
                     <div className="pt-1">
@@ -585,34 +607,7 @@ export function HomeDashboard() {
                     </div>
                   ) : null}
 
-                  {/* Follow-up Question Suggestion Buttons */}
-                  {(() => {
-                    const validFollowUps = (msg.followUps || []).filter(
-                      (q) => typeof q === "string" && q.trim().length > 0
-                    );
-                    if (validFollowUps.length === 0) return null;
-                    return (
-                      <div className="pt-2 space-y-1.5 border-t border-zinc-800/60">
-                        <span className="text-[10px] text-zinc-400 font-medium uppercase tracking-wider block">
-                          Suggested follow-up:
-                        </span>
-                        <div className="flex flex-wrap gap-1.5">
-                          {validFollowUps.map((q, idx) => (
-                            <button
-                              key={idx}
-                              type="button"
-                              disabled={isTyping}
-                              onClick={() => handleSendQuery(q)}
-                              className="text-left rounded-lg bg-blue-950/80 border border-blue-800/60 hover:bg-blue-900/90 active:bg-blue-800 text-blue-300 text-[11px] px-3 py-1.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 cursor-pointer shadow-xs focus:outline-hidden focus:ring-1 focus:ring-blue-400"
-                            >
-                              <span className="text-blue-400 text-xs">💬</span>
-                              <span>{q}</span>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })()}
+
                 </div>
               </div>
             ))}

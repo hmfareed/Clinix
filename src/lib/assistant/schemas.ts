@@ -15,9 +15,12 @@ export const assistantStateEnum = z.enum([
   "idle",
   "collecting_symptoms",
   "screening",
+  "screening_safety",
   "asking_questions",
+  "asking_follow_up",
   "evaluating",
   "presenting_result",
+  "presenting_guidance",
   "completed",
   "escalated",
   "failed",
@@ -72,8 +75,14 @@ export const assessmentDetailsSchema = z.object({
 export const structuredAssistantResponseSchema = z.object({
   intent: assistantIntentEnum,
   state: assistantStateEnum,
+  conversationStage: assistantStateEnum.optional(),
+  awaitingPatientResponse: z.boolean().optional(),
   message: z.string().min(1).max(3000),
+  nextQuestion: z.string().nullable().optional(),
   followUpQuestion: followUpQuestionSchema.nullable().optional(),
+  assessmentSummary: z.string().optional(),
+  nextSteps: z.array(z.string()).optional(),
+  urgencyLevel: z.string().optional(),
   safety: z.object({
     urgentPathwayTriggered: z.boolean().default(false),
     ruleIds: z.array(z.string()).default([]),
@@ -81,6 +90,14 @@ export const structuredAssistantResponseSchema = z.object({
   actions: z.array(assistantActionSchema).default([]),
   sources: z.array(assistantSourceSchema).default([]),
   assessmentDetails: assessmentDetailsSchema.optional(),
+  facilityResults: z.array(z.any()).optional(),
+  clinicSearchPrompt: z
+    .object({
+      active: z.boolean(),
+      defaultRadiusMeters: z.number().default(5000),
+      detectedLocationName: z.string().optional(),
+    })
+    .optional(),
 });
 
 export type FollowUpQuestion = z.infer<typeof followUpQuestionSchema>;

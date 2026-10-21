@@ -66,6 +66,9 @@ export async function assessSymptoms(input: ClinicalInput): Promise<AssessmentRe
     return {
       urgency: "emergency",
       urgencyLevel: "emergency",
+      conversationStage: "escalated",
+      awaitingPatientResponse: false,
+      nextQuestion: null,
       message: emergMsg,
       summary: emergMsg,
       reply: emergMsg,
@@ -114,21 +117,28 @@ export async function assessSymptoms(input: ClinicalInput): Promise<AssessmentRe
     "yo",
   ];
 
-  if (GREETING_LIST.includes(cleanInput) || cleanInput.length <= 2) {
+  const isGreeting =
+    GREETING_LIST.includes(cleanInput) ||
+    cleanInput.length <= 2 ||
+    GREETING_LIST.some((g) => cleanInput.startsWith(`${g} `) && cleanInput.length < 25);
+
+  if (isGreeting) {
     const greetingText =
       "Hello! I am your Clinix Health Assistant. Tell me what symptoms or health concerns you are experiencing, and I will help guide you toward possible causes, next steps, and verified care.";
 
     return {
       urgency: "insufficient_information",
       urgencyLevel: "insufficient_information",
+      conversationStage: "collecting_symptoms",
+      awaitingPatientResponse: true,
+      nextQuestion: "What symptoms or health concerns are you experiencing?",
       message: greetingText,
       summary: "Hello! I am your Clinix AI Health Assistant.",
       reply: greetingText,
       possibleConditions: [],
       possibleCauses: [],
       followUpQuestions: [
-        "What symptoms are you experiencing?",
-        "When did these symptoms first begin?",
+        "What symptoms or health concerns are you experiencing?",
       ],
       recommendedNextSteps: [
         "Please describe the specific symptoms you are experiencing.",
@@ -302,6 +312,9 @@ export async function assessSymptoms(input: ClinicalInput): Promise<AssessmentRe
     return {
       urgency: "urgent",
       urgencyLevel: "urgent",
+      conversationStage: "presenting_guidance",
+      awaitingPatientResponse: false,
+      nextQuestion: null,
       message: urgentMsg,
       summary: urgentMsg,
       reply: urgentMsg,
@@ -449,6 +462,9 @@ export async function assessSymptoms(input: ClinicalInput): Promise<AssessmentRe
   return {
     urgency: "routine",
     urgencyLevel: "routine",
+    conversationStage: "asking_follow_up",
+    awaitingPatientResponse: followUpQuestions.length > 0,
+    nextQuestion: followUpQuestions[0] || null,
     message: conversationalMessage,
     summary: `Reported symptoms (${input.symptoms}) evaluated against Clinix clinical guidance. Physical medical evaluation recommended.`,
     reply: conversationalMessage,

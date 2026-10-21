@@ -6,9 +6,12 @@ export type AssistantState =
   | "idle"
   | "collecting_symptoms"
   | "screening"
+  | "screening_safety"
   | "asking_questions"
+  | "asking_follow_up"
   | "evaluating"
   | "presenting_result"
+  | "presenting_guidance"
   | "completed"
   | "escalated"
   | "failed";
@@ -61,9 +64,12 @@ const AssistantConversationSchema = new Schema<IAssistantConversation>(
         "idle",
         "collecting_symptoms",
         "screening",
+        "screening_safety",
         "asking_questions",
+        "asking_follow_up",
         "evaluating",
         "presenting_result",
+        "presenting_guidance",
         "completed",
         "escalated",
         "failed",

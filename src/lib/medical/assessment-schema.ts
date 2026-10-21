@@ -54,6 +54,10 @@ export const assessmentSchema = z
     summary: z.string().optional(),
     message: z.string().optional(),
     reply: z.string().optional(),
+    conversationStage: z.string().optional(),
+    awaitingPatientResponse: z.boolean().optional(),
+    nextQuestion: z.string().nullable().optional(),
+    assessmentSummary: z.string().optional(),
     urgency: urgencyEnum.optional(),
     urgencyLevel: urgencyEnum.optional(),
     possibleConditions: z.array(conditionSchema).default([]),
@@ -89,11 +93,24 @@ export const assessmentSchema = z
       (data.limitations && data.limitations[0]) ||
       "This guidance is informational and for triage purposes only, not a confirmed medical diagnosis. If symptoms worsen, seek care immediately.";
 
+    const nextQuestion = data.nextQuestion || (data.followUpQuestions && data.followUpQuestions[0]) || null;
+    const awaitingPatientResponse =
+      data.awaitingPatientResponse !== undefined
+        ? data.awaitingPatientResponse
+        : Boolean(nextQuestion);
+    const conversationStage =
+      data.conversationStage || (awaitingPatientResponse ? "asking_follow_up" : "presenting_guidance");
+    const assessmentSummary = data.assessmentSummary || (awaitingPatientResponse ? undefined : mainMessage);
+
     return {
       ...data,
       summary: mainMessage,
       message: mainMessage,
       reply: mainMessage,
+      conversationStage,
+      awaitingPatientResponse,
+      nextQuestion,
+      assessmentSummary,
       urgency: mainUrgency,
       urgencyLevel: mainUrgency,
       possibleConditions: conditions,
@@ -126,4 +143,12 @@ export type Condition = z.infer<typeof conditionSchema>;
 export type OTCDrugSuggestion = z.infer<typeof otcDrugSuggestionSchema>;
 export type MedicationGuidance = z.infer<typeof medicationGuidanceSchema>;
 export type Urgency = z.infer<typeof urgencyEnum>;
-export type Assessment = z.infer<typeof assessmentSchema>;
+export type Assessment = Omit<
+  z.infer<typeof assessmentSchema>,
+  "assessmentSummary" | "conversationStage" | "awaitingPatientResponse" | "nextQuestion"
+> & {
+  assessmentSummary?: string;
+  conversationStage?: string;
+  awaitingPatientResponse?: boolean;
+  nextQuestion?: string | null;
+};

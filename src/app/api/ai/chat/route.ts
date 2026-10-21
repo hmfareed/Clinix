@@ -5,6 +5,9 @@ import { assessSymptoms } from "@/services/assessment-service";
 import { checkRateLimit } from "@/lib/security/rate-limit";
 import { logAuditEvent } from "@/lib/audit/audit";
 import { auth } from "@/lib/auth/auth";
+import { defaultHealthcarePlacesService } from "@/lib/healthcare-places/places-service";
+import { defaultGeocodeService } from "@/lib/healthcare-places/geocode-service";
+import { formatDistance } from "@/lib/healthcare-places/distance";
 
 const MAX_FOLLOW_UP_TURNS = 6;
 
@@ -34,6 +37,14 @@ const chatRequestSchema = z.object({
   pregnancy: z.enum(["yes", "no", "unknown", "not_applicable"]).optional(),
   language: z.string().default("en"),
   concludeNow: z.boolean().default(false),
+  locationContext: z
+    .object({
+      latitude: z.number().min(-90).max(90),
+      longitude: z.number().min(-180).max(180),
+      radiusMeters: z.number().min(500).max(25000).optional(),
+      locationName: z.string().max(120).optional(),
+    })
+    .optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -96,6 +107,7 @@ export async function POST(req: NextRequest) {
       pregnancy,
       language,
       concludeNow,
+      locationContext,
     } = parseResult.data;
 
     // Check for fixed refusal on out-of-scope prescription requests
@@ -129,6 +141,144 @@ export async function POST(req: NextRequest) {
             redFlags: [],
             disclaimer: "Clinix provides clinical triage and health navigation only, not medical prescriptions or definitive diagnoses.",
           },
+          requestId,
+        },
+        { status: 200, headers: rateLimitHeaders }
+      );
+    }
+
+    // Check for clinic search / healthcare places discovery
+    const CLINIC_SEARCH_KEYWORDS = [
+      "hospital",
+      "clinic",
+      "doctor near",
+      "nearest hospital",
+      "nearest clinic",
+      "find care",
+      "medical facility",
+      "emergency room",
+      "urgent care",
+      "pharmacy",
+      "health center",
+      "health centre",
+    ];
+
+    const isClinicSearch =
+      Boolean(locationContext) ||
+      CLINIC_SEARCH_KEYWORDS.some((kw) => lowerMessage.includes(kw));
+
+    if (isClinicSearch) {
+      let lat = locationContext?.latitude;
+      let lng = locationContext?.longitude;
+      let locName = locationContext?.locationName;
+      const radiusMeters = locationContext?.radiusMeters || 5000;
+
+      if (lat === undefined || lng === undefined) {
+        const geocoded = await defaultGeocodeService.geocode({ query: message });
+        if (geocoded && geocoded.provider !== "fallback_regional_center") {
+          lat = geocoded.latitude;
+          lng = geocoded.longitude;
+          locName = geocoded.displayName;
+        }
+      }
+
+      if (lat === undefined || lng === undefined) {
+        return NextResponse.json(
+          {
+            success: true,
+            data: {
+              summary: "Find Nearby Healthcare Facilities",
+              message:
+                "To locate verified hospitals and clinics near you, Clinix needs permission to use your device location, or you can enter your town or area below.",
+              reply:
+                "To locate verified hospitals and clinics near you, Clinix needs permission to use your device location, or you can enter your town or area below.",
+              urgency: "routine",
+              urgencyLevel: "routine",
+              possibleConditions: [],
+              possibleCauses: [],
+              followUpQuestions: [],
+              recommendedNextSteps: [
+                "Tap 'Use My Location' to discover facilities closest to you.",
+                "Or enter your town or neighbourhood (e.g., Accra, Kumasi, Osu).",
+                "For life-threatening emergencies, call 112 immediately.",
+              ],
+              nextSteps: [
+                "Tap 'Use My Location' to discover facilities closest to you.",
+                "Or enter your town or neighbourhood (e.g., Accra, Kumasi, Osu).",
+                "For life-threatening emergencies, call 112 immediately.",
+              ],
+              redFlags: [],
+              disclaimer:
+                "Clinix displays verified healthcare facilities from public records. Always verify hours before traveling.",
+              clinicSearchPrompt: {
+                active: true,
+                defaultRadiusMeters: 5000,
+              },
+              facilityResults: [],
+            },
+            isConcluded: false,
+            requestId,
+          },
+          { status: 200, headers: rateLimitHeaders }
+        );
+      }
+
+      const places = await defaultHealthcarePlacesService.searchNearby({
+        latitude: lat,
+        longitude: lng,
+        radiusMeters,
+        limit: 5,
+      });
+
+      const facilities = places.facilities;
+      const radiusKm = Math.round(radiusMeters / 1000);
+      const summaries = facilities
+        .slice(0, 3)
+        .map(
+          (f, i) =>
+            `${i + 1}. **${f.name}** (${formatDistance(f.distanceMeters)}) - ${f.formattedAddress}${
+              f.phoneNumber ? ` • Tel: ${f.phoneNumber}` : ""
+            }`
+        )
+        .join("\n\n");
+
+      return NextResponse.json(
+        {
+          success: true,
+          data: {
+            summary: `Verified Healthcare Facilities (${facilities.length} found)`,
+            message:
+              facilities.length > 0
+                ? `Here are verified healthcare facilities within ${radiusKm} km of ${locName || "your location"}:\n\n${summaries}\n\n*Please confirm emergency hours prior to departure.*`
+                : `I could not locate verified facilities within ${radiusKm} km of ${locName || "your location"}. You may expand the search radius or browse our full directory.`,
+            reply:
+              facilities.length > 0
+                ? `Here are verified healthcare facilities within ${radiusKm} km of ${locName || "your location"}:\n\n${summaries}\n\n*Please confirm emergency hours prior to departure.*`
+                : `I could not locate verified facilities within ${radiusKm} km of ${locName || "your location"}. You may expand the search radius or browse our full directory.`,
+            urgency: "routine",
+            urgencyLevel: "routine",
+            possibleConditions: [],
+            possibleCauses: [],
+            followUpQuestions: [],
+            recommendedNextSteps: [
+              "Contact the facility beforehand to verify physician availability and current wait times.",
+              "If you have severe chest pain, stroke symptoms, or severe breathing difficulties, call 112 immediately.",
+            ],
+            nextSteps: [
+              "Contact the facility beforehand to verify physician availability and current wait times.",
+              "If you have severe chest pain, stroke symptoms, or severe breathing difficulties, call 112 immediately.",
+            ],
+            redFlags: [],
+            disclaimer:
+              "Clinix displays verified healthcare facilities from public records. Always verify hours before traveling.",
+            facilityResults: facilities,
+            clinicSearchPrompt: {
+              active: true,
+              defaultRadiusMeters: radiusMeters,
+              detectedLocationName: locName,
+            },
+          },
+          isConcluded: false,
           requestId,
         },
         { status: 200, headers: rateLimitHeaders }

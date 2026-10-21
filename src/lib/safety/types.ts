@@ -74,6 +74,10 @@ export interface GeneratedAssessmentOutput {
   summary: string;
   message?: string;
   reply?: string;
+  conversationStage?: string;
+  awaitingPatientResponse?: boolean;
+  nextQuestion?: string | null;
+  assessmentSummary?: string;
   urgency: UrgencyTier;
   urgencyLevel?: UrgencyTier;
   possibleConditions: Array<{
