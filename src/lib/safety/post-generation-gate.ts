@@ -62,6 +62,7 @@ export function enforceSafetyGate(
     input.text,
     input.symptoms,
     aiAssessment.summary,
+    aiAssessment.message,
     ...aiAssessment.possibleConditions.map((c) => `${c.name} ${c.explanation}`),
   ]
     .filter(Boolean)
@@ -72,11 +73,18 @@ export function enforceSafetyGate(
   // 2. If safety engine detects emergency, return immediate emergency assessment
   if (safety.emergencyDetected) {
     return {
+      ...aiAssessment,
       urgency: "emergency",
+      urgencyLevel: "emergency",
       summary: safety.patientMessage,
+      message: safety.patientMessage,
+      reply: safety.patientMessage,
       possibleConditions: [],
+      possibleCauses: [],
       followUpQuestions: [],
       recommendedNextSteps: safety.nextSteps,
+      nextSteps: safety.nextSteps,
+      redFlags: ["Critical emergency warning signs detected — immediate 112 emergency response required."],
       medicationGuidance: {
         available: false,
         explanation:
@@ -118,7 +126,7 @@ export function enforceSafetyGate(
   }
 
   // 6. Return validated assessment with mandatory limitation disclaimer
-  const limitations = [...(aiAssessment.limitations || [])];
+  const limitations: string[] = [...(aiAssessment.limitations || [])];
   if (!limitations.some((l) => l.toLowerCase().includes("not a confirmed diagnosis"))) {
     limitations.unshift("This assessment provides clinical triage guidance and is not a confirmed medical diagnosis.");
   }
@@ -126,6 +134,7 @@ export function enforceSafetyGate(
   return {
     ...aiAssessment,
     urgency: finalUrgency,
+    urgencyLevel: finalUrgency,
     medicationGuidance,
     limitations,
     triage: {

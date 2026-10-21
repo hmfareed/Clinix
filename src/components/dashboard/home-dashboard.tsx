@@ -20,6 +20,7 @@ import {
   Activity,
   AlertCircle,
   X,
+  Loader2,
 } from "lucide-react";
 import { ConsentModal } from "@/components/consent/consent-modal";
 
@@ -28,10 +29,18 @@ interface Message {
   sender: "assistant" | "user";
   text: string;
   isEmergency?: boolean;
-  urgency?: "emergency" | "urgent" | "routine" | "self_care_eligible";
+  urgency?: "emergency" | "urgent" | "routine" | "self_care_eligible" | "insufficient_information";
   followUps?: string[];
   recommendations?: string[];
-  possibleCauses?: Array<{ condition: string; probability?: string; rationale?: string }>;
+  possibleCauses?: Array<{
+    condition?: string;
+    name?: string;
+    probability?: string;
+    rationale?: string;
+    explanation?: string;
+  }>;
+  redFlags?: string[];
+  disclaimer?: string;
 }
 
 export function HomeDashboard() {
@@ -88,6 +97,19 @@ export function HomeDashboard() {
     const text = (textToSend || symptomInput).trim();
     if (!text || isTyping) return;
 
+    // Handle quick action links
+    if (text.toLowerCase().includes("start a full symptom check")) {
+      router.push("/symptom-checker");
+      return;
+    }
+    if (text.toLowerCase().includes("retry sending")) {
+      const lastUser = [...messages].reverse().find((m) => m.sender === "user");
+      if (lastUser) {
+        handleSendQuery(lastUser.text);
+      }
+      return;
+    }
+
     const userMsg: Message = {
       id: `u-${Date.now()}`,
       sender: "user",
@@ -105,10 +127,18 @@ export function HomeDashboard() {
       lower.includes("chest pain") ||
       lower.includes("heart attack") ||
       lower.includes("can't breathe") ||
+      lower.includes("cant breathe") ||
       lower.includes("shortness of breath") ||
       lower.includes("stroke") ||
       lower.includes("severe bleeding") ||
-      lower.includes("unconscious");
+      lower.includes("unconscious") ||
+      lower.includes("thunderclap") ||
+      lower.includes("worst headache of my life") ||
+      lower.includes("worst headache") ||
+      (lower.includes("stiff neck") && (lower.includes("fever") || lower.includes("vomit"))) ||
+      lower.includes("slurred speech") ||
+      lower.includes("facial droop") ||
+      lower.includes("arm weakness");
 
     if (isEmergency) {
       setTimeout(() => {
@@ -120,17 +150,28 @@ export function HomeDashboard() {
             sender: "assistant",
             isEmergency: true,
             urgency: "emergency",
-            text: "EMERGENCY WARNING: Severe symptoms like chest pain, severe breathing difficulty, or signs of stroke require immediate in-person emergency care. Please do not wait for an automated chat. Call emergency dispatch immediately.",
+            text: "EMERGENCY WARNING: Severe symptoms like chest pain, severe breathing difficulty, sudden thunderclap headache, stiff neck with fever, or signs of stroke require immediate in-person emergency care. Please do not wait for an automated chat. Call emergency dispatch immediately.",
+            redFlags: [
+              "Sudden explosive onset ('thunderclap') or progressive neurological deficit",
+              "Stiff neck accompanied by fever, vomiting, or altered mental state",
+              "Chest tightness, shortness of breath, or loss of consciousness",
+            ],
             recommendations: [
               "Call 112 immediately or proceed to the nearest emergency facility.",
-              "Do not attempt to drive yourself if experiencing acute distress or chest pain.",
+              "Do not attempt to drive yourself if experiencing acute distress or neurological symptoms.",
             ],
+            disclaimer: "Emergency protocols activated. Immediate in-person medical care is required.",
           },
         ]);
         setShowEmergencyModal(true);
-      }, 300);
+      }, 250);
       return;
     }
+
+    // Accumulate clinical symptoms context across multi-turn queries
+    const priorUserTexts = messages.filter((m) => m.sender === "user").map((m) => m.text);
+    const cumulativeSymptoms =
+      priorUserTexts.length > 0 ? `${priorUserTexts.join(". ")}. Current update: ${text}` : text;
 
     // Prepare conversation history matching API schema (prior turns)
     const conversationHistory = messages
@@ -146,7 +187,7 @@ export function HomeDashboard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: text,
-          symptoms: text,
+          symptoms: cumulativeSymptoms,
           conversationHistory,
         }),
       });
@@ -156,12 +197,44 @@ export function HomeDashboard() {
 
       if (res.ok && json.data) {
         const data = json.data;
-        const urgency = data.urgency;
+        const urgency = data.urgencyLevel || data.urgency;
         const isEmerg = urgency === "emergency";
         const replyText =
+          data.message ||
           data.reply ||
           data.summary ||
           "I have assessed your symptoms against clinical safety and triage protocols.";
+
+        // Clean conditions: require non-empty condition or name
+        const rawCauses = data.possibleCauses || data.possibleConditions || [];
+        const validCauses = Array.isArray(rawCauses)
+          ? rawCauses
+              .filter((c: any) => Boolean((c.name || c.condition)?.trim()))
+              .map((c: any) => ({
+                condition: (c.condition || c.name || "").trim(),
+                name: (c.name || c.condition || "").trim(),
+                explanation: (c.explanation || c.rationale || "").trim(),
+                probability: c.probability,
+              }))
+          : [];
+
+        // Clean recommendations
+        const rawRecs = data.nextSteps || data.recommendedNextSteps || [];
+        const validRecs = Array.isArray(rawRecs)
+          ? rawRecs.filter((r: any) => typeof r === "string" && r.trim().length > 0)
+          : [];
+
+        // Clean follow-ups
+        const rawFollowUps = data.followUpQuestions || [];
+        const validFollowUps = Array.isArray(rawFollowUps)
+          ? rawFollowUps.filter((q: any) => typeof q === "string" && q.trim().length > 0)
+          : [];
+
+        // Clean red flags
+        const rawRedFlags = data.redFlags || [];
+        const validRedFlags = Array.isArray(rawRedFlags)
+          ? rawRedFlags.filter((f: any) => typeof f === "string" && f.trim().length > 0)
+          : [];
 
         setMessages((prev) => [
           ...prev,
@@ -171,9 +244,11 @@ export function HomeDashboard() {
             text: replyText,
             isEmergency: isEmerg,
             urgency,
-            followUps: data.followUpQuestions,
-            recommendations: data.recommendedNextSteps,
-            possibleCauses: data.possibleConditions,
+            followUps: validFollowUps,
+            recommendations: validRecs,
+            possibleCauses: validCauses,
+            redFlags: validRedFlags,
+            disclaimer: data.disclaimer,
           },
         ]);
 
@@ -183,13 +258,18 @@ export function HomeDashboard() {
       } else {
         const fallbackText =
           json.error?.message ||
-          "I understand your symptoms. For an accurate clinical risk assessment and recommended next steps, please start a full symptom check.";
+          "We couldn't connect to the health assistant right now. If you are experiencing severe or worsening symptoms, please call 112 immediately or visit the nearest healthcare facility.";
         setMessages((prev) => [
           ...prev,
           {
             id: `a-${Date.now()}`,
             sender: "assistant",
             text: fallbackText,
+            recommendations: [
+              "If your symptoms are severe or distressing, call 112 immediately.",
+              "You can retry sending your message or start a full structured symptom check.",
+            ],
+            followUps: ["Retry sending my message", "Start a full symptom check"],
           },
         ]);
       }
@@ -200,7 +280,12 @@ export function HomeDashboard() {
         {
           id: `a-${Date.now()}`,
           sender: "assistant",
-          text: "Thank you for sharing your symptoms. To get personalized clinical triage and locate nearby verified facilities, please start a full symptom check.",
+          text: "Network connection was interrupted. If you have an urgent medical concern, call 112 immediately.",
+          recommendations: [
+            "Check your internet connection and try sending your message again.",
+            "If in distress, call emergency services directly.",
+          ],
+          followUps: ["Retry sending my message"],
         },
       ]);
     }
@@ -306,7 +391,7 @@ export function HomeDashboard() {
       {/* 3. SPLIT MIDDLE SECTION (Appears immediately on the first screen!) */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 sm:gap-4 items-start">
         {/* Left Column: Your Health Assistant (7 of 12 cols) */}
-        <div className="lg:col-span-7 rounded-2xl border border-zinc-800/80 bg-zinc-950 p-4 sm:p-5 shadow-md space-y-3">
+        <div className="lg:col-span-7 rounded-2xl border border-zinc-800/80 bg-zinc-950 p-4 sm:p-5 shadow-md flex flex-col justify-between min-h-[490px] space-y-3">
           <div className="flex items-center justify-between border-b border-zinc-900 pb-2.5">
             <div className="flex items-center gap-2">
               <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-950/70 border border-blue-800/50 text-blue-400">
@@ -328,7 +413,7 @@ export function HomeDashboard() {
 
           {/* Conversational Stream */}
           <div
-            className="space-y-2.5 max-h-[200px] sm:max-h-[240px] overflow-y-auto pr-1"
+            className="space-y-3 min-h-[300px] max-h-[460px] overflow-y-auto pr-1.5 scroll-smooth flex-1"
             role="log"
             aria-live="polite"
           >
@@ -345,7 +430,7 @@ export function HomeDashboard() {
                   </div>
                 )}
                 <div
-                  className={`max-w-[85%] rounded-xl p-2.5 sm:p-3 text-xs leading-relaxed space-y-2 ${
+                  className={`max-w-[88%] rounded-xl p-3 sm:p-3.5 text-xs sm:text-[13px] leading-relaxed space-y-2.5 break-words whitespace-pre-wrap ${
                     msg.isEmergency
                       ? "bg-red-950/70 text-red-100 border border-red-800/80 font-medium"
                       : msg.sender === "user"
@@ -364,52 +449,110 @@ export function HomeDashboard() {
                             ? "bg-amber-950/80 border-amber-800 text-amber-300"
                             : msg.urgency === "routine"
                             ? "bg-blue-950/80 border-blue-800 text-blue-300"
-                            : "bg-emerald-950/80 border-emerald-800 text-emerald-300"
+                            : msg.urgency === "self_care_eligible"
+                            ? "bg-emerald-950/80 border-emerald-800 text-emerald-300"
+                            : "bg-zinc-800 border-zinc-700 text-zinc-300"
                         }`}
                       >
                         {msg.urgency === "emergency" && "Emergency Action Required"}
                         {msg.urgency === "urgent" && "Urgent Care Recommended"}
                         {msg.urgency === "routine" && "Scheduled Evaluation"}
                         {msg.urgency === "self_care_eligible" && "Self-Care Eligible"}
+                        {msg.urgency === "insufficient_information" && "Clinical Triage Inquiry"}
                       </span>
                     </div>
                   )}
 
-                  <p>{msg.text}</p>
+                  <p className="text-zinc-200 leading-relaxed font-normal">{msg.text}</p>
 
-                  {/* Differential Possibilities */}
-                  {msg.possibleCauses && msg.possibleCauses.length > 0 && (
-                    <div className="rounded-lg bg-black/60 p-2 border border-zinc-800/80 space-y-1">
-                      <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block">
-                        Possible Considerations (Differential):
-                      </span>
-                      <div className="space-y-1">
-                        {msg.possibleCauses.slice(0, 3).map((cause, idx) => (
-                          <div key={idx} className="flex items-center justify-between text-[11px]">
-                            <span className="text-zinc-200 font-medium">{cause.condition}</span>
-                            {cause.probability && (
-                              <span className="text-[9px] text-zinc-400 capitalize px-1.5 py-0.5 bg-zinc-900 rounded border border-zinc-800">
-                                {cause.probability}
-                              </span>
-                            )}
-                          </div>
-                        ))}
+                  {/* Warning Signs (Red Flags) — Prominent Emergency Box */}
+                  {(() => {
+                    const validFlags = (msg.redFlags || []).filter(
+                      (f) => typeof f === "string" && f.trim().length > 0
+                    );
+                    if (validFlags.length === 0) return null;
+                    return (
+                      <div className="rounded-lg bg-red-950/40 border border-red-800/60 p-2.5 space-y-1.5 animate-in fade-in">
+                        <div className="flex items-center gap-1.5 text-red-300 font-semibold text-[11px]">
+                          <AlertCircle className="h-3.5 w-3.5 shrink-0 text-red-400" />
+                          <span>When to Seek Immediate Emergency Care:</span>
+                        </div>
+                        <ul className="list-disc list-inside text-[11px] text-red-200/90 space-y-1 pl-0.5">
+                          {validFlags.map((flag, idx) => (
+                            <li key={idx} className="leading-snug">{flag}</li>
+                          ))}
+                        </ul>
                       </div>
-                    </div>
-                  )}
+                    );
+                  })()}
 
-                  {/* Recommended Next Steps */}
-                  {msg.recommendations && msg.recommendations.length > 0 && (
-                    <div className="rounded-lg bg-black/40 p-2 border border-zinc-800/60 space-y-1">
-                      <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block">
-                        Recommended Next Steps:
-                      </span>
-                      <ul className="list-disc list-inside text-[11px] text-zinc-300 space-y-0.5">
-                        {msg.recommendations.slice(0, 2).map((rec, idx) => (
-                          <li key={idx}>{rec}</li>
-                        ))}
-                      </ul>
-                    </div>
+                  {/* Possible Considerations (Differential) — only rendered when valid non-empty items exist */}
+                  {(() => {
+                    const validCauses = (msg.possibleCauses || []).filter(
+                      (cause) => Boolean((cause.condition || cause.name)?.trim())
+                    );
+                    if (validCauses.length === 0) return null;
+                    return (
+                      <div className="rounded-lg bg-black/60 p-2.5 border border-zinc-800/80 space-y-2 animate-in fade-in">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
+                            Possible Considerations (Differential):
+                          </span>
+                          <span className="text-[9px] text-zinc-500 italic">Non-diagnostic</span>
+                        </div>
+                        <div className="space-y-1.5">
+                          {validCauses.slice(0, 3).map((cause, idx) => {
+                            const title = (cause.condition || cause.name || "").trim();
+                            const explanation = (cause.explanation || cause.rationale || "").trim();
+                            return (
+                              <div
+                                key={idx}
+                                className="text-[11px] space-y-0.5 border-b border-zinc-800/40 pb-1.5 last:border-b-0 last:pb-0"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <span className="text-zinc-200 font-semibold">{title}</span>
+                                  {cause.probability && (
+                                    <span className="text-[9px] text-zinc-400 capitalize px-1.5 py-0.5 bg-zinc-900 rounded border border-zinc-800">
+                                      {cause.probability}
+                                    </span>
+                                  )}
+                                </div>
+                                {explanation && (
+                                  <p className="text-[10px] text-zinc-400 leading-normal">{explanation}</p>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Recommended Next Steps — only rendered when valid steps exist */}
+                  {(() => {
+                    const validRecs = (msg.recommendations || []).filter(
+                      (rec) => typeof rec === "string" && rec.trim().length > 0
+                    );
+                    if (validRecs.length === 0) return null;
+                    return (
+                      <div className="rounded-lg bg-black/40 p-2.5 border border-zinc-800/60 space-y-1.5 animate-in fade-in">
+                        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
+                          Recommended Next Steps:
+                        </span>
+                        <ul className="list-disc list-inside text-[11px] text-zinc-300 space-y-1">
+                          {validRecs.slice(0, 3).map((rec, idx) => (
+                            <li key={idx} className="leading-snug">{rec}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Disclaimer notice */}
+                  {msg.disclaimer && (
+                    <p className="text-[10px] text-zinc-500 italic border-t border-zinc-800/40 pt-1 leading-tight">
+                      ⚕️ {msg.disclaimer}
+                    </p>
                   )}
 
                   {/* Action buttons & Links */}
@@ -417,13 +560,13 @@ export function HomeDashboard() {
                     <div className="pt-1">
                       <a
                         href="tel:112"
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 text-white px-3 py-1.5 text-xs font-bold shadow hover:bg-red-500"
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 text-white px-3 py-1.5 text-xs font-bold shadow-sm hover:bg-red-500 transition cursor-pointer"
                       >
                         <PhoneCall className="h-3 w-3 animate-bounce" />
                         <span>Dial 112 Emergency Dispatch Now</span>
                       </a>
                     </div>
-                  ) : msg.urgency ? (
+                  ) : msg.urgency && msg.urgency !== "insufficient_information" ? (
                     <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-zinc-800/60">
                       <Link
                         href="/clinics"
@@ -442,36 +585,50 @@ export function HomeDashboard() {
                     </div>
                   ) : null}
 
-                  {/* Follow-up Question Chips */}
-                  {msg.followUps && msg.followUps.length > 0 && (
-                    <div className="pt-1 space-y-1">
-                      <span className="text-[10px] text-zinc-400 font-medium block">
-                        Suggested follow-up:
-                      </span>
-                      <div className="flex flex-wrap gap-1">
-                        {msg.followUps.slice(0, 2).map((q, idx) => (
-                          <button
-                            key={idx}
-                            onClick={() => handleSendQuery(q)}
-                            className="text-left rounded-lg bg-blue-950/70 border border-blue-800/60 hover:bg-blue-900/80 text-blue-300 text-[11px] px-2.5 py-1 transition-colors"
-                          >
-                            💬 {q}
-                          </button>
-                        ))}
+                  {/* Follow-up Question Suggestion Buttons */}
+                  {(() => {
+                    const validFollowUps = (msg.followUps || []).filter(
+                      (q) => typeof q === "string" && q.trim().length > 0
+                    );
+                    if (validFollowUps.length === 0) return null;
+                    return (
+                      <div className="pt-2 space-y-1.5 border-t border-zinc-800/60">
+                        <span className="text-[10px] text-zinc-400 font-medium uppercase tracking-wider block">
+                          Suggested follow-up:
+                        </span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {validFollowUps.map((q, idx) => (
+                            <button
+                              key={idx}
+                              type="button"
+                              disabled={isTyping}
+                              onClick={() => handleSendQuery(q)}
+                              className="text-left rounded-lg bg-blue-950/80 border border-blue-800/60 hover:bg-blue-900/90 active:bg-blue-800 text-blue-300 text-[11px] px-3 py-1.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 cursor-pointer shadow-xs focus:outline-hidden focus:ring-1 focus:ring-blue-400"
+                            >
+                              <span className="text-blue-400 text-xs">💬</span>
+                              <span>{q}</span>
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    );
+                  })()}
                 </div>
               </div>
             ))}
 
             {isTyping && (
-              <div className="flex gap-2 items-center">
+              <div className="flex gap-2 items-center animate-in fade-in duration-150">
                 <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white">
-                  <Activity className="h-3 w-3 animate-spin" />
+                  <Loader2 className="h-3 w-3 animate-spin" />
                 </div>
-                <div className="rounded-xl bg-zinc-900 border border-zinc-800 px-3 py-1.5 text-[11px] text-zinc-400">
-                  <span className="animate-pulse">Consulting LLaMA 3.1 & clinical safety engine...</span>
+                <div className="flex items-center gap-1.5 rounded-xl bg-zinc-900 border border-zinc-800 px-3 py-1.5 text-xs text-zinc-300">
+                  <span className="font-medium text-zinc-300">Thinking</span>
+                  <span className="flex gap-1 items-center ml-0.5">
+                    <span className="h-1 w-1 rounded-full bg-zinc-400 animate-bounce [animation-delay:-0.3s]" />
+                    <span className="h-1 w-1 rounded-full bg-zinc-400 animate-bounce [animation-delay:-0.15s]" />
+                    <span className="h-1 w-1 rounded-full bg-zinc-400 animate-bounce" />
+                  </span>
                 </div>
               </div>
             )}

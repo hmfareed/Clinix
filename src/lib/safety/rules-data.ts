@@ -71,7 +71,7 @@ export const REVIEWED_TRIAGE_RULES: TriageRule[] = [
     level: 1,
     category: "neurological",
     patterns: {
-      keywords: ["unconscious", "unresponsive", "syncope", "seizure", "convulsion", "coma"],
+      keywords: ["unconscious", "unresponsive", "syncope", "seizure", "convulsion", "coma", "thunderclap"],
       phrases: [
         "loss of consciousness",
         "passed out",
@@ -87,6 +87,12 @@ export const REVIEWED_TRIAGE_RULES: TriageRule[] = [
         "having a seizure",
         "violent shaking",
         "unconcious",
+        "thunderclap headache",
+        "thunderclap",
+        "worst headache of my life",
+        "worst headache",
+        "sudden severe headache",
+        "sudden explosive headache",
       ],
     },
     patientMessageKey: "emergency_stroke_neuro",

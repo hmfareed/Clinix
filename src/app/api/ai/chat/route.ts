@@ -102,21 +102,105 @@ export async function POST(req: NextRequest) {
     const prescriptionKeywords = ["prescribe", "prescription", "write me a script", "give me antibiotics"];
     const lowerMessage = message.toLowerCase();
     if (prescriptionKeywords.some((kw) => lowerMessage.includes(kw))) {
+      const refusalMsg =
+        "Clinix is an informational triage assistant and cannot issue prescriptions, calculate specific doses, or prescribe medications. Please visit a licensed physician or consult a registered pharmacist for prescription medicines.";
+
       return NextResponse.json(
         {
           success: true,
           data: {
             isRefusal: true,
             summary: "Prescription requests cannot be fulfilled.",
-            reply:
-              "Clinix is an informational triage assistant and cannot issue prescriptions, calculate specific doses, or prescribe medications. Please visit a licensed physician or consult a registered pharmacist for prescription medicines.",
+            message: refusalMsg,
+            reply: refusalMsg,
+            urgency: "routine",
+            urgencyLevel: "routine",
+            possibleConditions: [],
+            possibleCauses: [],
             followUpQuestions: [],
             recommendedNextSteps: [
               "Consult a licensed medical doctor or clinic for physical examination and prescription evaluation.",
               "Speak with a licensed community pharmacist regarding over-the-counter options.",
             ],
-            urgency: "routine",
+            nextSteps: [
+              "Consult a licensed medical doctor or clinic for physical examination and prescription evaluation.",
+              "Speak with a licensed community pharmacist regarding over-the-counter options.",
+            ],
+            redFlags: [],
+            disclaimer: "Clinix provides clinical triage and health navigation only, not medical prescriptions or definitive diagnoses.",
           },
+          requestId,
+        },
+        { status: 200, headers: rateLimitHeaders }
+      );
+    }
+
+    // Check for greetings and introductory conversational openers (immediate response, no LLM lag)
+    const GREETING_WORDS = [
+      "hi",
+      "hello",
+      "hey",
+      "good morning",
+      "good afternoon",
+      "good evening",
+      "how are you",
+      "howdy",
+      "sup",
+      "what can you do",
+      "help",
+      "who are you",
+      "greetings",
+    ];
+
+    const cleanLower = message.trim().toLowerCase().replace(/[^a-z0-9\s]/g, "");
+    const isGreeting =
+      GREETING_WORDS.includes(cleanLower) ||
+      GREETING_WORDS.some((g) => cleanLower.startsWith(`${g} `) && cleanLower.length < 20);
+
+    if (isGreeting) {
+      const greetingMsg =
+        "Hello! I am your Clinix Health Assistant. Tell me what symptoms or health concerns you are experiencing, and I will help guide you toward possible causes, next steps, and verified care.";
+
+      return NextResponse.json(
+        {
+          success: true,
+          data: {
+            summary: "Hello! I am your Clinix AI Health Assistant.",
+            message: greetingMsg,
+            reply: greetingMsg,
+            urgency: "insufficient_information",
+            urgencyLevel: "insufficient_information",
+            possibleConditions: [],
+            possibleCauses: [],
+            followUpQuestions: [
+              "I have a fever or chills",
+              "I have stomach pain or nausea",
+              "I have a headache or migraine",
+              "I have a cough or chest discomfort",
+            ],
+            recommendedNextSteps: [
+              "Describe the symptoms you are feeling in everyday language.",
+              "Include how long you have had them and their severity.",
+              "If you are experiencing severe chest pain or shortness of breath, dial 112 immediately.",
+            ],
+            nextSteps: [
+              "Describe the symptoms you are feeling in everyday language.",
+              "Include how long you have had them and their severity.",
+              "If you are experiencing severe chest pain or shortness of breath, dial 112 immediately.",
+            ],
+            redFlags: [],
+            disclaimer: "This guidance is for clinical triage navigation only and is not a confirmed medical diagnosis.",
+            medicationGuidance: {
+              available: false,
+              explanation: "Medication information is available once specific symptoms or medications are mentioned.",
+              requiresProfessionalReview: true,
+              suggestedOTCDrugs: [],
+            },
+            limitations: [
+              "A greeting was received. Please describe your symptoms for a structured assessment.",
+            ],
+          },
+          isConcluded: false,
           requestId,
         },
         { status: 200, headers: rateLimitHeaders }

@@ -22,6 +22,13 @@ import {
   StructuredAssessmentData,
 } from "@/lib/assistant/symptom-tracker";
 import {
+  detectSymptomPathway,
+  getNextAdaptiveQuestion,
+  hasEnoughInfoForEvaluation,
+  SymptomPathway,
+  SYMPTOM_PATHWAYS,
+} from "@/lib/assistant/symptom-adaptive-questions";
+import {
   structuredAssistantResponseSchema,
   StructuredAssistantResponse,
 } from "@/lib/assistant/schemas";
@@ -61,6 +68,15 @@ export interface AssistantTurnResult {
   intent: AssistantIntent;
   response: StructuredAssistantResponse;
   assessmentId?: string;
+  /** Rich structured assessment data — populated when state is presenting_result */
+  assessmentDetails?: {
+    summary: string;
+    urgency: string;
+    possibleConditions: Array<{ name: string; explanation: string; supportingSymptoms?: string[]; missingInformation?: string[] }>;
+    recommendedNextSteps: string[];
+    suggestedOTCDrugs: Array<{ name: string; purpose: string; warning: string }>;
+    limitations: string[];
+  };
 }
 
 export class AssistantAuthorizationError extends Error {
@@ -438,6 +454,25 @@ export class ClinixAssistantService {
       intent,
       response: structuredResponse,
       assessmentId: conversation.assessmentId ? String(conversation.assessmentId) : undefined,
+      // Populate assessmentDetails for the presenting_result state so the UI can render the rich card
+      assessmentDetails:
+        structuredResponse.state === "presenting_result" && conversation.assessmentId
+          ? await Assessment.findById(conversation.assessmentId)
+              .lean()
+              .then((doc) =>
+                doc
+                  ? {
+                      summary: doc.summary,
+                      urgency: doc.urgency,
+                      possibleConditions: doc.possibleConditions ?? [],
+                      recommendedNextSteps: doc.recommendations ?? [],
+                      suggestedOTCDrugs:
+                        (doc.medicationGuidance as any)?.suggestedOTCDrugs ?? [],
+                      limitations: doc.limitations ?? [],
+                    }
+                  : undefined
+              )
+          : undefined,
     };
   }
 
@@ -649,7 +684,8 @@ export class ClinixAssistantService {
   }
 
   /**
-   * Handles structured symptom collection, follow-up questions, and final assessment
+   * Handles structured symptom collection, adaptive follow-up questions, and final assessment.
+   * Uses symptom-pathway-aware question selection for a tailored clinical interview.
    */
   private async handleSymptomWorkflow(
     message: string,
@@ -664,10 +700,16 @@ export class ClinixAssistantService {
       assessmentDoc = await Assessment.findById(conversation.assessmentId);
     }
 
-    // If starting fresh or no assessment exists
+    // =========================================================================
+    // BRANCH A: Starting fresh — no assessment exists yet
+    // =========================================================================
     if (!assessmentDoc || currentState === "idle") {
       assertValidTransition(currentState, "collecting_symptoms");
       conversation.currentState = "collecting_symptoms";
+
+      // Detect the symptom pathway from the initial message
+      const detectedPathway = detectSymptomPathway(message);
+      const pathwayDef = SYMPTOM_PATHWAYS[detectedPathway];
 
       // Initialize structured assessment in database
       assessmentDoc = await Assessment.create({
@@ -691,27 +733,28 @@ export class ClinixAssistantService {
           model: MODEL,
           promptVersion: ASSISTANT_PROMPT_VERSION,
         },
+        // Store detected pathway in aiMetadata for continuity
       });
 
-      conversation.assessmentId = assessmentDoc._id as mongoose.Types.ObjectId;
-      await conversation.save();
-
-      // Ask first standard follow-up question
-      const firstQ: FollowUpQuestionDefinition = {
-        id: "symptom_duration",
-        text: "How long have you been experiencing these symptoms?",
-        type: "single_choice",
-        options: ["Less than 24 hours", "1 to 3 days", "4 to 7 days", "More than a week", "Not sure"],
-        category: "duration",
+      // Store pathway on assessment for later retrieval
+      // We persist the pathway in the aiMetadata field as a simple mechanism
+      (assessmentDoc as any).aiMetadata = {
+        ...(assessmentDoc as any).aiMetadata,
+        detectedPathway,
       };
 
+      conversation.assessmentId = assessmentDoc._id as mongoose.Types.ObjectId;
       conversation.currentState = "asking_questions";
       await conversation.save();
+      await assessmentDoc.save();
+
+      // Ask the very first adaptive question for the detected pathway
+      const firstQ = pathwayDef.questions[0];
 
       return {
         intent: "symptom_assessment",
         state: "asking_questions",
-        message: `I understand you are experiencing: "${message}". To help me provide relevant information, could you share a few more details?`,
+        message: `I understand you're experiencing: *"${message}"*\n\nTo help me understand your situation better and guide you to the right care, I have a few focused questions. I'll ask them one at a time.\n\n📋 **Symptom pathway detected:** ${pathwayDef.label}`,
         followUpQuestion: {
           id: firstQ.id,
           text: firstQ.text,
@@ -724,11 +767,19 @@ export class ClinixAssistantService {
       };
     }
 
-    // In asking_questions state: Record answer, update symptoms, and ask next question or evaluate
+    // =========================================================================
+    // BRANCH B: Ongoing assessment — collecting follow-up answers
+    // =========================================================================
+
+    // Build consolidated symptom text from all collected info
     const existingSymptoms = assessmentDoc.symptoms.map((s) => s.description).join("; ");
     const consolidatedText = `${existingSymptoms}. Additional update: ${message}`;
 
-    // Re-check safety with full consolidated context
+    // Append the latest answer to symptoms for richer context
+    assessmentDoc.symptoms.push({ description: message });
+    await assessmentDoc.save();
+
+    // Re-check safety with full consolidated context after every answer
     const reevaluatedSafety = checkEmergencyRules({
       text: consolidatedText,
       symptoms: consolidatedText,
@@ -747,7 +798,7 @@ export class ClinixAssistantService {
         state: "escalated",
         message:
           reevaluatedSafety.patientMessage ||
-          "EMERGENCY WARNING: Your updated symptoms indicate potential critical warning signs. Please call emergency services immediately.",
+          "⚠️ **EMERGENCY WARNING:** Your updated symptoms indicate potential critical warning signs. Please call emergency services immediately.",
         followUpQuestion: null,
         safety: { urgentPathwayTriggered: true, ruleIds: reevaluatedSafety.matchedRuleIds },
         actions: [
@@ -763,14 +814,38 @@ export class ClinixAssistantService {
       };
     }
 
-    // Retrieve previous messages to count turns
+    // Retrieve conversation history for turn counting
     const history = await AssistantMessage.find({ conversationId: conversation._id }).sort({ createdAt: 1 });
     const userTurnCount = history.filter((m) => m.role === "patient").length;
 
-    // After 2-3 questions or if user asks for conclusion, evaluate symptoms!
-    if (userTurnCount >= 3 || /enough|conclude|what is it|summary|done/i.test(message)) {
+    // Determine which adaptive pathway to use
+    // We re-detect from the full consolidated symptom text for best coverage
+    const fullSymptomText = assessmentDoc.symptoms.map((s) => s.description).join(" ");
+    const currentPathway = detectSymptomPathway(fullSymptomText);
+    const pathwayDef = SYMPTOM_PATHWAYS[currentPathway];
+
+    // Build the set of already-answered question IDs from prior assistant messages
+    const answeredQIds = history
+      .filter((m) => m.role === "assistant" && (m.structuredPayload as any)?.followUpQuestion?.id)
+      .map((m) => (m.structuredPayload as any).followUpQuestion.id as string);
+
+    // Check for user-requested early conclusion
+    const userWantsConclusion = /enough|conclude|tell me|what is it|summary|done|result|diagnos/i.test(message);
+
+    // =========================================================================
+    // DECISION: Evaluate now, or ask the next adaptive question?
+    // =========================================================================
+    const readyToEvaluate =
+      userWantsConclusion ||
+      hasEnoughInfoForEvaluation(currentPathway, answeredQIds, userTurnCount);
+
+    if (readyToEvaluate) {
+      // -----------------------------------------------------------------------
+      // EVALUATE — run the AI assessment
+      // -----------------------------------------------------------------------
       assertValidTransition(conversation.currentState, "evaluating");
       conversation.currentState = "evaluating";
+      await conversation.save();
 
       const clinicalResult = await assessSymptoms({
         symptoms: consolidatedText,
@@ -780,7 +855,7 @@ export class ClinixAssistantService {
         })),
       });
 
-      // Update assessment in database
+      // Update assessment document with AI results
       assessmentDoc.urgency = clinicalResult.urgency;
       assessmentDoc.summary = clinicalResult.summary;
       assessmentDoc.possibleConditions = clinicalResult.possibleConditions;
@@ -793,54 +868,115 @@ export class ClinixAssistantService {
       conversation.currentState = "presenting_result";
       await conversation.save();
 
-      const possibleCausesText = clinicalResult.possibleConditions.length > 0
-        ? "\n\n**Possible Explanations to Discuss with a Clinician:**\n" +
-          clinicalResult.possibleConditions
-            .map((c) => `• **${c.name}**: ${c.explanation}`)
-            .join("\n")
-        : "";
+      // Build possible conditions text
+      const possibleCausesText =
+        clinicalResult.possibleConditions.length > 0
+          ? "\n\n**Possible Explanations to Discuss with a Clinician:**\n" +
+            clinicalResult.possibleConditions
+              .map((c) => `• **${c.name}**: ${c.explanation}`)
+              .join("\n")
+          : "";
 
-      const stepsText = clinicalResult.recommendedNextSteps.length > 0
-        ? "\n\n**Recommended Next Steps:**\n" +
-          clinicalResult.recommendedNextSteps.map((s) => `• ${s}`).join("\n")
-        : "";
+      // Build recommended steps text
+      const stepsText =
+        clinicalResult.recommendedNextSteps.length > 0
+          ? "\n\n**Recommended Next Steps:**\n" +
+            clinicalResult.recommendedNextSteps.map((s, i) => `${i + 1}. ${s}`).join("\n")
+          : "";
+
+      // Build OTC drug suggestions text (only for routine/self-care)
+      const otcDrugs = (clinicalResult.medicationGuidance as any)?.suggestedOTCDrugs;
+      const medicationText =
+        otcDrugs && otcDrugs.length > 0 &&
+        (clinicalResult.urgency === "routine" || clinicalResult.urgency === "self_care_eligible")
+          ? "\n\n**Over-the-Counter Relief Options** *(ask your pharmacist before use)*:\n" +
+            otcDrugs
+              .map((d: { name: string; purpose: string; warning: string }) =>
+                `• **${d.name}** — ${d.purpose}\n  ⚠️ *${d.warning}*`
+              )
+              .join("\n")
+          : "";
+
+      // Auto-fetch nearby clinics to include in actions
+      let clinicActions: StructuredAssistantResponse["actions"] = [];
+      try {
+        const facilities = await defaultFacilityService.searchFacilities({ query: "clinic hospital", limit: 2 });
+        clinicActions = facilities.map((f, i) => ({
+          id: `nearby_clinic_${i}`,
+          label: f.name,
+          type: "link" as const,
+          target: `/clinics`,
+        }));
+      } catch {
+        // Clinic fetch failure is non-critical; user can still navigate
+      }
+
+      // Urgency label for display
+      const urgencyLabels: Record<string, string> = {
+        emergency: "🚨 Emergency",
+        urgent: "⚠️ Urgent — see a doctor soon",
+        routine: "🟢 Routine — professional review recommended",
+        self_care_eligible: "🟡 Self-care eligible with monitoring",
+        insufficient_information: "ℹ️ More information needed",
+      };
+      const urgencyLabel = urgencyLabels[clinicalResult.urgency] || clinicalResult.urgency;
 
       return {
         intent: "symptom_assessment",
         state: "presenting_result",
-        message: `${clinicalResult.summary}${possibleCausesText}${stepsText}\n\n*Reminder: This is health navigation guidance, not a medical diagnosis. If symptoms worsen, seek professional care.*`,
+        message: `**Assessment Complete**\n\n**Urgency Level:** ${urgencyLabel}\n\n**Summary:** ${clinicalResult.summary}${possibleCausesText}${stepsText}${medicationText}\n\n---\n*⚕️ This is health navigation guidance — not a medical diagnosis. Always consult a qualified healthcare professional. If symptoms worsen, seek care immediately.*`,
         followUpQuestion: null,
         safety: {
-          urgentPathwayTriggered: clinicalResult.urgency === "emergency",
+          urgentPathwayTriggered: clinicalResult.urgency === "emergency" || clinicalResult.urgency === "urgent",
           ruleIds: [],
         },
         actions: [
           { id: "find_clinic", label: "Find Nearby Clinic", type: "link", target: "/clinics" },
+          ...clinicActions,
           { id: "save_assessment", label: "Save to My Records", type: "action", target: "save_assessment" },
           { id: "new_consultation", label: "New Consultation", type: "action", target: "new_conversation" },
         ],
         sources: [{ id: "clinix_triage", title: "Clinix Clinical Guidance Engine" }],
+        assessmentDetails: {
+          summary: clinicalResult.summary,
+          urgency: clinicalResult.urgency,
+          possibleConditions: clinicalResult.possibleConditions,
+          recommendedNextSteps: clinicalResult.recommendedNextSteps,
+          suggestedOTCDrugs: otcDrugs || [],
+          limitations: clinicalResult.limitations,
+        },
       };
     }
 
-    // Ask second follow-up question (severity / associated symptoms)
-    const severityQ: FollowUpQuestionDefinition = {
-      id: "symptom_severity",
-      text: "How severe would you say the symptoms are right now?",
-      type: "single_choice",
-      options: ["Mild (manageable)", "Moderate (interfering with activities)", "Severe (intense distress)", "Not sure"],
-      category: "severity",
-    };
+    // -----------------------------------------------------------------------
+    // Ask the next adaptive question for this symptom pathway
+    // -----------------------------------------------------------------------
+    const nextQ = getNextAdaptiveQuestion(currentPathway, answeredQIds);
+
+    if (!nextQ) {
+      // All questions answered but evaluator said not enough — force evaluate
+      return this.handleSymptomWorkflow(message + " [enough info]", conversation, authContext);
+    }
+
+    // Compute progress for the patient
+    const totalRequired = pathwayDef.questions.filter((q) => q.required).length;
+    const answeredRequired = pathwayDef.questions
+      .filter((q) => q.required)
+      .filter((q) => answeredQIds.includes(q.id)).length;
+    const progressLabel =
+      answeredRequired < totalRequired
+        ? ` *(Question ${answeredRequired + 1} of ${totalRequired})*`
+        : "";
 
     return {
       intent: "assessment_follow_up",
       state: "asking_questions",
-      message: "Thank you for providing that detail. One more question to help gauge the situation:",
+      message: `Thank you for that detail.${progressLabel}`,
       followUpQuestion: {
-        id: severityQ.id,
-        text: severityQ.text,
-        type: severityQ.type,
-        options: severityQ.options,
+        id: nextQ.id,
+        text: nextQ.text,
+        type: nextQ.type,
+        options: nextQ.options,
       },
       safety: { urgentPathwayTriggered: false, ruleIds: [] },
       actions: [],

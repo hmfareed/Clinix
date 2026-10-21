@@ -2,7 +2,11 @@ import OpenAI from "openai";
 
 export const NVIDIA_BASE_URL = "https://integrate.api.nvidia.com/v1";
 export const DEFAULT_MODEL = "meta/llama-3.2-11b-vision-instruct";
-export const AI_TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS) || 90000;
+const configuredTimeout = Number(process.env.AI_TIMEOUT_MS);
+export const AI_TIMEOUT_MS =
+  !isNaN(configuredTimeout) && configuredTimeout > 0
+    ? configuredTimeout
+    : 45000;
 
 export class AssessmentUnavailableError extends Error {
   public readonly code = "AI_UNAVAILABLE";

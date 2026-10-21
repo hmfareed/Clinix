@@ -72,15 +72,30 @@ export interface PatientSafetyInput {
 
 export interface GeneratedAssessmentOutput {
   summary: string;
+  message?: string;
+  reply?: string;
   urgency: UrgencyTier;
+  urgencyLevel?: UrgencyTier;
   possibleConditions: Array<{
     name: string;
     explanation: string;
     supportingSymptoms: string[];
     missingInformation: string[];
   }>;
+  possibleCauses?: Array<{
+    name?: string;
+    condition?: string;
+    explanation?: string;
+    rationale?: string;
+    supportingSymptoms?: string[];
+    missingInformation?: string[];
+    probability?: string;
+  }>;
   followUpQuestions: string[];
   recommendedNextSteps: string[];
+  nextSteps?: string[];
+  redFlags?: string[];
+  disclaimer?: string;
   medicationGuidance: {
     available: boolean;
     explanation: string;

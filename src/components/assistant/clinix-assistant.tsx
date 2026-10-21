@@ -4,6 +4,8 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import {
   HeartPulse,
   Send,
@@ -24,11 +26,13 @@ import {
   X,
   FileText,
   BookmarkCheck,
+  Activity,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { ConsentModal } from "@/components/consent/consent-modal";
+import { AssessmentResultCard } from "@/components/assistant/AssessmentResultCard";
 import {
   StructuredAssistantResponse,
   FollowUpQuestion,
@@ -42,6 +46,15 @@ interface MessageItem {
   responseType?: string;
   intent?: string;
   structuredPayload?: StructuredAssistantResponse;
+  /** Parsed assessment data for rich result rendering */
+  assessmentData?: {
+    summary: string;
+    urgency: "emergency" | "urgent" | "routine" | "self_care_eligible" | "insufficient_information";
+    possibleConditions: Array<{ name: string; explanation: string; supportingSymptoms?: string[]; missingInformation?: string[] }>;
+    recommendedNextSteps: string[];
+    suggestedOTCDrugs: Array<{ name: string; purpose: string; warning: string }>;
+    limitations: string[];
+  };
   createdAt: string;
 }
 
@@ -60,6 +73,8 @@ const QUICK_PROMPTS = [
   "Stomach pain and nausea this morning",
 ];
 
+const CONCLUDE_PROMPT = "I've answered enough — please give me your assessment now.";
+
 export function ClinixAssistant() {
   const router = useRouter();
   const { data: session } = useSession();
@@ -69,6 +84,7 @@ export function ClinixAssistant() {
   const [currentState, setCurrentState] = React.useState<string>("idle");
   const [messages, setMessages] = React.useState<MessageItem[]>([]);
   const [activeAssessmentId, setActiveAssessmentId] = React.useState<string | null>(null);
+  const [patientTurnCount, setPatientTurnCount] = React.useState(0);
 
   // Input & sending
   const [inputText, setInputText] = React.useState("");
@@ -133,6 +149,7 @@ export function ClinixAssistant() {
     setErrorState(null);
     setIsEmergencyEscalated(false);
     setActiveAssessmentId(null);
+    setPatientTurnCount(0);
 
     try {
       const res = await fetch("/api/v1/assistant/conversations", {
@@ -195,6 +212,7 @@ export function ClinixAssistant() {
           responseType: m.responseType,
           intent: m.intent,
           structuredPayload: m.structuredPayload,
+          assessmentData: m.structuredPayload?.assessmentDetails ?? undefined,
           createdAt: m.createdAt,
         }));
 
@@ -250,6 +268,7 @@ export function ClinixAssistant() {
     setIsProcessing(true);
     setErrorState(null);
     setUnsentMessage(null);
+    setPatientTurnCount((c) => c + 1);
 
     try {
       const res = await fetch(`/api/v1/assistant/conversations/${targetConvId}/messages`, {
@@ -286,6 +305,7 @@ export function ClinixAssistant() {
         responseType: respPayload.followUpQuestion ? "follow_up_question" : "message",
         intent: respPayload.intent,
         structuredPayload: respPayload,
+        assessmentData: turnData.assessmentDetails ?? respPayload.assessmentDetails ?? undefined,
         createdAt: new Date().toISOString(),
       };
 
@@ -441,11 +461,22 @@ export function ClinixAssistant() {
           const followUp = msg.structuredPayload?.followUpQuestion;
           const actions = msg.structuredPayload?.actions || [];
           const sources = msg.structuredPayload?.sources || [];
+          const isAssessmentResult = msg.intent === "symptom_assessment" && msg.responseType === "assessment_result";
+
+          // Extract structured assessment data from actions for AssessmentResultCard
+          const nearbyClinicLinks = actions
+            .filter((a) => a.id.startsWith("nearby_clinic_") && a.target)
+            .map((a) => ({ label: a.label, href: a.target! }));
+
+          const details = msg.assessmentData || msg.structuredPayload?.assessmentDetails;
+          const hasAssessmentDetails = Boolean(
+            details && (details.possibleConditions?.length > 0 || details.summary)
+          );
 
           return (
             <div
               key={msg.id}
-              className={`flex flex-col ${isPatient ? "items-end" : "items-start"} max-w-[85%] sm:max-w-[75%] ${
+              className={`flex flex-col ${isPatient ? "items-end" : "items-start"} max-w-[85%] sm:max-w-[78%] ${
                 isPatient ? "ml-auto" : "mr-auto"
               }`}
             >
@@ -456,7 +487,7 @@ export function ClinixAssistant() {
                     : isEmergency
                     ? "bg-red-50 dark:bg-red-950/40 text-red-900 dark:text-red-100 border-2 border-red-500 rounded-bl-xs shadow-sm"
                     : "bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-800 rounded-bl-xs shadow-xs"
-                }`}
+                } w-full`}
               >
                 {/* Emergency Header if applicable */}
                 {isEmergency && (
@@ -466,14 +497,37 @@ export function ClinixAssistant() {
                   </div>
                 )}
 
-                {/* Main Message Body */}
-                <div className="whitespace-pre-wrap">{msg.content}</div>
+                {/* Main Message Body — rendered as Markdown for assistant, plain text for patient */}
+                {isPatient ? (
+                  <div className="whitespace-pre-wrap">{msg.content}</div>
+                ) : hasAssessmentDetails && msg.structuredPayload?.state === "presenting_result" ? (
+                  <div className="space-y-3">
+                    <p className="text-sm text-slate-800 dark:text-slate-200 font-medium">
+                      Based on your responses, I have completed the symptom analysis. Here is the evaluation, potential causes, relief options, and nearby healthcare facilities:
+                    </p>
+                    <AssessmentResultCard
+                      summary={details!.summary}
+                      urgency={details!.urgency as any}
+                      possibleConditions={details!.possibleConditions}
+                      recommendedNextSteps={details!.recommendedNextSteps}
+                      suggestedOTCDrugs={details!.suggestedOTCDrugs}
+                      limitations={details!.limitations}
+                      nearbyClinicLinks={nearbyClinicLinks}
+                    />
+                  </div>
+                ) : (
+                  <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-headings:my-1.5 prose-strong:text-slate-900 dark:prose-strong:text-white">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {msg.content}
+                    </ReactMarkdown>
+                  </div>
+                )}
 
                 {/* Structured Follow-Up Question Chips */}
                 {followUp && followUp.options && followUp.options.length > 0 && (
                   <div className="mt-3.5 pt-3 border-t border-slate-100 dark:border-slate-800/80">
                     <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">
-                      Choose an option or type below:
+                      {followUp.text}
                     </p>
                     <div className="flex flex-wrap gap-1.5">
                       {followUp.options.map((opt) => (
@@ -491,61 +545,63 @@ export function ClinixAssistant() {
                 )}
 
                 {/* Action Buttons */}
-                {actions.length > 0 && (
+                {actions.filter((a) => !a.id.startsWith("nearby_clinic_")).length > 0 && (
                   <div className="mt-3.5 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex flex-wrap gap-2">
-                    {actions.map((act) => {
-                      if (act.type === "link" && act.target) {
-                        return (
-                          <Link
-                            key={act.id}
-                            href={act.target}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
-                          >
-                            <ExternalLink className="h-3.5 w-3.5 text-teal-600" />
-                            {act.label}
-                          </Link>
-                        );
-                      }
-                      if (act.type === "call" && act.target) {
-                        return (
-                          <a
-                            key={act.id}
-                            href={act.target}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-red-600 text-white hover:bg-red-700 shadow-xs transition"
-                          >
-                            <PhoneCall className="h-3.5 w-3.5" />
-                            {act.label}
-                          </a>
-                        );
-                      }
-                      if (act.target === "save_assessment") {
-                        return (
-                          <button
-                            key={act.id}
-                            type="button"
-                            onClick={handleSaveAssessment}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border border-teal-300 dark:border-teal-800 hover:bg-teal-100 transition cursor-pointer"
-                          >
-                            <FileText className="h-3.5 w-3.5" />
-                            {act.label}
-                          </button>
-                        );
-                      }
-                      if (act.target === "new_conversation") {
-                        return (
-                          <button
-                            key={act.id}
-                            type="button"
-                            onClick={startNewConversation}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 transition cursor-pointer"
-                          >
-                            <RotateCcw className="h-3.5 w-3.5" />
-                            {act.label}
-                          </button>
-                        );
-                      }
-                      return null;
-                    })}
+                    {actions
+                      .filter((a) => !a.id.startsWith("nearby_clinic_"))
+                      .map((act) => {
+                        if (act.type === "link" && act.target) {
+                          return (
+                            <Link
+                              key={act.id}
+                              href={act.target}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
+                            >
+                              <ExternalLink className="h-3.5 w-3.5 text-teal-600" />
+                              {act.label}
+                            </Link>
+                          );
+                        }
+                        if (act.type === "call" && act.target) {
+                          return (
+                            <a
+                              key={act.id}
+                              href={act.target}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-red-600 text-white hover:bg-red-700 shadow-xs transition"
+                            >
+                              <PhoneCall className="h-3.5 w-3.5" />
+                              {act.label}
+                            </a>
+                          );
+                        }
+                        if (act.target === "save_assessment") {
+                          return (
+                            <button
+                              key={act.id}
+                              type="button"
+                              onClick={handleSaveAssessment}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border border-teal-300 dark:border-teal-800 hover:bg-teal-100 transition cursor-pointer"
+                            >
+                              <FileText className="h-3.5 w-3.5" />
+                              {act.label}
+                            </button>
+                          );
+                        }
+                        if (act.target === "new_conversation") {
+                          return (
+                            <button
+                              key={act.id}
+                              type="button"
+                              onClick={startNewConversation}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 transition cursor-pointer"
+                            >
+                              <RotateCcw className="h-3.5 w-3.5" />
+                              {act.label}
+                            </button>
+                          );
+                        }
+                        return null;
+                      })}
                   </div>
                 )}
 
@@ -567,9 +623,14 @@ export function ClinixAssistant() {
 
         {/* Typing indicator */}
         {isProcessing && (
-          <div className="flex items-center gap-2 p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl rounded-bl-xs max-w-[200px] shadow-xs">
+          <div className="flex items-center gap-2 px-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl rounded-bl-xs shadow-xs max-w-[160px] animate-in fade-in duration-150">
             <Loader2 className="h-4 w-4 animate-spin text-teal-600" />
-            <span className="text-xs text-slate-500 dark:text-slate-400">Evaluating health context...</span>
+            <span className="text-xs font-medium text-slate-700 dark:text-slate-300">Thinking</span>
+            <span className="flex gap-0.5 items-center ml-0.5">
+              <span className="h-1 w-1 rounded-full bg-slate-400 dark:bg-slate-500 animate-bounce [animation-delay:-0.3s]" />
+              <span className="h-1 w-1 rounded-full bg-slate-400 dark:bg-slate-500 animate-bounce [animation-delay:-0.15s]" />
+              <span className="h-1 w-1 rounded-full bg-slate-400 dark:bg-slate-500 animate-bounce" />
+            </span>
           </div>
         )}
 
@@ -630,6 +691,26 @@ export function ClinixAssistant() {
                 {prompt}
               </button>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* 5b. During symptom assessment — progress indicator + "Conclude" chip */}
+      {currentState === "asking_questions" && messages.length > 2 && (
+        <div className="px-4 py-2 border-t border-slate-200 dark:border-slate-800 bg-teal-50/60 dark:bg-teal-950/20">
+          <div className="flex items-center justify-between">
+            <p className="text-[11px] text-teal-700 dark:text-teal-400 font-medium flex items-center gap-1.5">
+              <Activity className="h-3.5 w-3.5" />
+              Assessment in progress — answering questions helps me give better guidance
+            </p>
+            <button
+              type="button"
+              onClick={() => handleSendMessage(CONCLUDE_PROMPT)}
+              disabled={isProcessing}
+              className="whitespace-nowrap px-3 py-1 rounded-full bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-300 text-[11px] font-semibold border border-teal-300 dark:border-teal-700 hover:bg-teal-200 transition cursor-pointer disabled:opacity-40"
+            >
+              Get assessment now →
+            </button>
           </div>
         </div>
       )}

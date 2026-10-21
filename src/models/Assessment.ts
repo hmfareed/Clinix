@@ -24,6 +24,11 @@ export interface IAssessment extends Document {
     available: boolean;
     explanation: string;
     requiresProfessionalReview: boolean;
+    suggestedOTCDrugs?: Array<{
+      name: string;
+      purpose: string;
+      warning: string;
+    }>;
   };
   triage: {
     level: string;
@@ -88,6 +93,13 @@ const AssessmentSchema = new Schema<IAssessment>(
       available: { type: Boolean, default: false },
       explanation: { type: String },
       requiresProfessionalReview: { type: Boolean, default: true },
+      suggestedOTCDrugs: [
+        {
+          name: { type: String },
+          purpose: { type: String },
+          warning: { type: String },
+        },
+      ],
     },
     triage: {
       level: { type: String, required: true },

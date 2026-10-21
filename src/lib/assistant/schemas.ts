@@ -43,6 +43,32 @@ export const assistantSourceSchema = z.object({
   url: z.string().url().max(500).optional(),
 });
 
+export const assessmentDetailsSchema = z.object({
+  summary: z.string(),
+  urgency: z.string(),
+  possibleConditions: z
+    .array(
+      z.object({
+        name: z.string(),
+        explanation: z.string(),
+        supportingSymptoms: z.array(z.string()).default([]),
+        missingInformation: z.array(z.string()).default([]),
+      })
+    )
+    .default([]),
+  recommendedNextSteps: z.array(z.string()).default([]),
+  suggestedOTCDrugs: z
+    .array(
+      z.object({
+        name: z.string(),
+        purpose: z.string(),
+        warning: z.string(),
+      })
+    )
+    .default([]),
+  limitations: z.array(z.string()).default([]),
+});
+
 export const structuredAssistantResponseSchema = z.object({
   intent: assistantIntentEnum,
   state: assistantStateEnum,
@@ -54,9 +80,11 @@ export const structuredAssistantResponseSchema = z.object({
   }),
   actions: z.array(assistantActionSchema).default([]),
   sources: z.array(assistantSourceSchema).default([]),
+  assessmentDetails: assessmentDetailsSchema.optional(),
 });
 
 export type FollowUpQuestion = z.infer<typeof followUpQuestionSchema>;
 export type AssistantAction = z.infer<typeof assistantActionSchema>;
 export type AssistantSource = z.infer<typeof assistantSourceSchema>;
+export type AssessmentDetails = z.infer<typeof assessmentDetailsSchema>;
 export type StructuredAssistantResponse = z.infer<typeof structuredAssistantResponseSchema>;
