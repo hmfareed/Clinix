@@ -134,9 +134,15 @@ export default function MyAssessmentsPage() {
               <CardHeader className="p-4 pb-2">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
-                    <Badge className={`${URGENCY_COLORS[a.urgency] || "bg-slate-600 text-white"} capitalize text-xs`}>
-                      {a.urgency.replace(/_/g, " ")}
-                    </Badge>
+                    {a.isDraft || (a.status && a.status !== "completed") ? (
+                      <Badge className="bg-amber-600 text-white capitalize text-xs">
+                        Incomplete Draft
+                      </Badge>
+                    ) : (
+                      <Badge className={`${URGENCY_COLORS[a.urgency] || "bg-slate-600 text-white"} capitalize text-xs`}>
+                        {a.urgency?.replace(/_/g, " ") || "Routine"}
+                      </Badge>
+                    )}
                     <Badge variant="outline" className="text-[10px] text-amber-700 border-amber-300 bg-amber-50">
                       AI Generated & Unverified
                     </Badge>
@@ -150,7 +156,7 @@ export default function MyAssessmentsPage() {
               </CardHeader>
               <CardContent className="p-4 pt-1 space-y-2">
                 <p className="text-sm font-bold text-slate-900 dark:text-white">
-                  {a.summary}
+                  {a.primaryComplaint?.symptom || a.summary || "Draft Assessment"}
                 </p>
                 {a.symptoms?.[0]?.description && (
                   <p className="text-xs text-slate-600 dark:text-slate-400">
@@ -182,11 +188,19 @@ export default function MyAssessmentsPage() {
                   <Trash2 className="mr-1 h-3.5 w-3.5" />
                   {deletingId === a.id ? "Deleting..." : "Delete"}
                 </Button>
-                <Link href={`/dashboard/assessments/${a.id}`}>
-                  <Button variant="outline" size="sm" className="text-xs text-teal-700 border-teal-300 hover:bg-teal-50">
-                    Full Details & Summary →
-                  </Button>
-                </Link>
+                {a.isDraft || (a.status && a.status !== "completed") ? (
+                  <Link href={`/symptom-checker?draftId=${a.id}`}>
+                    <Button size="sm" className="bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold">
+                      Resume Draft →
+                    </Button>
+                  </Link>
+                ) : (
+                  <Link href={`/dashboard/assessments/${a.id}`}>
+                    <Button variant="outline" size="sm" className="text-xs text-teal-700 border-teal-300 hover:bg-teal-50">
+                      Full Details & Summary →
+                    </Button>
+                  </Link>
+                )}
               </CardFooter>
             </Card>
           ))}

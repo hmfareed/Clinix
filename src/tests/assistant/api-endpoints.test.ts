@@ -17,6 +17,8 @@ vi.mock("@/lib/auth/auth", () => ({
 
 vi.mock("@/lib/db/mongodb", () => ({
   connectToDatabase: vi.fn().mockResolvedValue(true),
+  tryConnectToDatabase: vi.fn().mockResolvedValue(true),
+  isDatabaseConnected: vi.fn().mockReturnValue(true),
 }));
 
 vi.mock("@/lib/audit/audit", () => ({

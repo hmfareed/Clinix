@@ -17,6 +17,8 @@ vi.mock("@/lib/auth/auth", () => ({
 // Mock database connection
 vi.mock("@/lib/db/mongodb", () => ({
   connectToDatabase: vi.fn().mockResolvedValue(true),
+  tryConnectToDatabase: vi.fn().mockResolvedValue(true),
+  isDatabaseConnected: vi.fn().mockReturnValue(true),
 }));
 
 // Mock audit logger so test runs in isolation

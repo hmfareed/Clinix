@@ -27,6 +27,7 @@ import {
   FileText,
   BookmarkCheck,
   Activity,
+  Stethoscope,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -572,15 +573,25 @@ export function ClinixAssistant() {
                         }
                         if (act.target === "save_assessment") {
                           return (
-                            <button
-                              key={act.id}
-                              type="button"
-                              onClick={handleSaveAssessment}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border border-teal-300 dark:border-teal-800 hover:bg-teal-100 transition cursor-pointer"
-                            >
-                              <FileText className="h-3.5 w-3.5" />
-                              {act.label}
-                            </button>
+                            <React.Fragment key={act.id}>
+                              <button
+                                type="button"
+                                onClick={handleSaveAssessment}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border border-teal-300 dark:border-teal-800 hover:bg-teal-100 transition cursor-pointer"
+                              >
+                                <FileText className="h-3.5 w-3.5" />
+                                {act.label}
+                              </button>
+                              {conversationId && (
+                                <Link
+                                  href={`/symptom-checker?conversationId=${conversationId}`}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-800 hover:bg-blue-100 transition"
+                                >
+                                  <Stethoscope className="h-3.5 w-3.5" />
+                                  Full Clinical Assessment →
+                                </Link>
+                              )}
+                            </React.Fragment>
                           );
                         }
                         if (act.target === "new_conversation") {

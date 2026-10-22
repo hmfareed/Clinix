@@ -1,18 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
-import crypto from "crypto";
 import { z } from "zod";
 import { defaultMedicationService } from "@/services/medication-service";
+import { MedicationClassification } from "@/lib/medication/types";
 
 const searchQuerySchema = z.object({
   q: z.string().max(100).optional().default(""),
+  category: z.string().max(50).optional(),
+  form: z.string().max(50).optional(),
+  classification: z.enum(["over_the_counter", "prescription_only", "pharmacist_only"]).optional(),
 });
 
 export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
     const qParam = url.searchParams.get("q") || "";
+    const categoryParam = url.searchParams.get("category") || undefined;
+    const formParam = url.searchParams.get("form") || undefined;
+    const classificationParam = (url.searchParams.get("classification") as MedicationClassification) || undefined;
 
-    const parseResult = searchQuerySchema.safeParse({ q: qParam });
+    const parseResult = searchQuerySchema.safeParse({
+      q: qParam,
+      category: categoryParam,
+      form: formParam,
+      classification: classificationParam,
+    });
+
     if (!parseResult.success) {
       return NextResponse.json(
         {
@@ -25,10 +37,12 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const { q } = parseResult.data;
-    const medications = q.trim()
-      ? await defaultMedicationService.searchMedications(q)
-      : await defaultMedicationService.getAllApproved();
+    const { q, category, form, classification } = parseResult.data;
+    const medications = await defaultMedicationService.searchMedicationsWithFilters(q, {
+      category,
+      form,
+      classification,
+    });
 
     return NextResponse.json({
       data: medications.map((med) => ({
@@ -38,9 +52,17 @@ export async function GET(req: NextRequest) {
         therapeuticClass: med.therapeuticClass,
         classification: med.classification,
         approvedIndications: med.approvedIndications,
+        activeIngredients: med.activeIngredients,
+        availableForms: med.availableForms,
+        dosageForms: med.dosageForms,
+        routes: med.routes,
+        boxedWarning: med.boxedWarning,
+        registrationNumber: med.registrationNumber,
+        referenceSource: med.referenceSource,
       })),
       meta: {
         total: medications.length,
+        query: q,
         timestamp: new Date().toISOString(),
       },
     });

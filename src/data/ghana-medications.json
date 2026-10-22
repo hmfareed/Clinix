@@ -9,6 +9,17 @@
       "Relief of mild to moderate pain (e.g. headache, toothache, muscle aches)",
       "Reduction of fever"
     ],
+    "activeIngredients": [
+      { "name": "Paracetamol", "strength": "500 mg" }
+    ],
+    "availableForms": [
+      { "form": "Tablet", "route": "Oral", "standardStrength": "500 mg" },
+      { "form": "Oral Suspension / Syrup", "route": "Oral", "standardStrength": "120 mg/5ml, 250 mg/5ml" },
+      { "form": "Suppository", "route": "Rectal", "standardStrength": "125 mg, 250 mg" },
+      { "form": "Effervescent Tablet", "route": "Oral", "standardStrength": "500 mg" }
+    ],
+    "dosageForms": ["Tablet", "Oral Suspension", "Syrup", "Suppository"],
+    "routes": ["Oral", "Rectal"],
     "contraindications": [
       {
         "condition": "Severe hepatic (liver) impairment",
@@ -29,6 +40,12 @@
       "isContraindicated": false,
       "warning": "Considered the preferred first-line analgesic/antipyretic during pregnancy when clinically needed, at the lowest effective dose for the shortest duration. Consult your healthcare provider."
     },
+    "breastfeedingPrecautions": {
+      "isContraindicated": false,
+      "warning": "Excreted in breast milk in negligible amounts; considered compatible with breastfeeding at therapeutic doses."
+    },
+    "pediatricPrecautions": "Use calibrated oral measuring syringes for liquids. Never estimate spoonfuls. Confirm concentration (120mg/5ml vs 250mg/5ml).",
+    "olderAdultPrecautions": "Ensure maximum daily limit of 3000 mg is not exceeded in frail elderly patients or those with low body weight (<50 kg).",
     "interactions": [
       {
         "medicineOrClass": "Warfarin",
@@ -41,9 +58,21 @@
         "severity": "major"
       }
     ],
+    "foodAlcoholInteractions": [
+      {
+        "item": "Alcohol",
+        "warning": "Chronic excessive alcohol consumption induces CYP2E1 enzymes, significantly increasing toxic metabolite (NAPQI) production and acute liver injury risk.",
+        "severity": "major"
+      }
+    ],
     "commonSideEffects": [
       "Generally well tolerated at therapeutic doses",
-      "Rare: skin rash, hypersensitivity reactions"
+      "Rare: mild nausea or skin rash"
+    ],
+    "seriousAdverseEffects": [
+      "Acute liver injury / hepatic failure (primarily with overdose or severe malnutrition)",
+      "Severe cutaneous adverse reactions (Stevens-Johnson syndrome, Toxic Epidermal Necrolysis)",
+      "Acute hypersensitivity / anaphylaxis (angioedema, breathing difficulty)"
     ],
     "administrationWarnings": [
       "Never exceed the maximum recommended daily dose (typically 4000 mg for adults in 24 hours).",
@@ -51,7 +80,11 @@
       "Seek medical advice if pain lasts more than 5 days or fever lasts more than 3 days.",
       "Avoid chronic excessive alcohol intake while taking paracetamol."
     ],
+    "storageAndHandling": "Store below 30°C in a dry place. Protect from excessive heat and direct sunlight. Keep out of reach of children.",
     "dosageDisclaimer": "Individual dosages (mg or ml) must be determined by a registered pharmacist or physician based on patient age, weight, and renal status. Always check the manufacturer packaging leaflet.",
+    "manufacturerOrDistributor": "Ernest Chemists / Danadams / Phyto-Riker / GSK",
+    "registrationNumber": "FDA/DR.2024-GH001",
+    "officialLabelUrl": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=2c310c8f-e14b-47e2-8f9f-07ef89dc42aa",
     "referenceSource": {
       "name": "Ghana Ministry of Health Standard Treatment Guidelines / Ghana FDA",
       "jurisdiction": "GH",
@@ -70,6 +103,17 @@
     "approvedIndications": [
       "Prevention and treatment of dehydration caused by acute diarrhea and vomiting"
     ],
+    "activeIngredients": [
+      { "name": "Sodium Chloride", "strength": "2.6 g/L" },
+      { "name": "Glucose, anhydrous", "strength": "13.5 g/L" },
+      { "name": "Potassium Chloride", "strength": "1.5 g/L" },
+      { "name": "Trisodium Citrate dihydrate", "strength": "2.9 g/L" }
+    ],
+    "availableForms": [
+      { "form": "Powder for Oral Solution", "route": "Oral", "standardStrength": "Standard WHO low-osmolarity formulation sachet" }
+    ],
+    "dosageForms": ["Powder / Sachet", "Oral Solution"],
+    "routes": ["Oral"],
     "contraindications": [
       {
         "condition": "Severe dehydration with shock or unconsciousness",
@@ -90,9 +134,19 @@
       "isContraindicated": false,
       "warning": "Safe and recommended for dehydration during pregnancy and lactation."
     },
+    "breastfeedingPrecautions": {
+      "isContraindicated": false,
+      "warning": "Continue frequent breastfeeding alongside ORS administration in infants."
+    },
+    "pediatricPrecautions": "Give in frequent small sips (e.g. 1 teaspoon every 1-2 minutes). If vomiting occurs, wait 10 minutes then resume slowly.",
+    "olderAdultPrecautions": "Monitor volume status carefully in patients with severe congestive heart failure or renal failure.",
     "interactions": [],
+    "foodAlcoholInteractions": [],
     "commonSideEffects": [
       "Mild nausea if consumed too rapidly"
+    ],
+    "seriousAdverseEffects": [
+      "Hypernatremia if prepared with insufficient water"
     ],
     "administrationWarnings": [
       "Always reconstitute the entire sachet in the exact volume of clean drinking water specified on the packet (usually 1 liter or 500 ml).",
@@ -100,7 +154,10 @@
       "Discard any unused reconstituted solution after 24 hours.",
       "Seek immediate medical attention if child exhibits signs of severe dehydration: sunken eyes, lethargy, or inability to drink."
     ],
+    "storageAndHandling": "Store unmixed sachets below 30°C in a dry place. Keep prepared liquid covered in a cool clean container and discard after 24 hours.",
     "dosageDisclaimer": "Administer frequently in small sips following each loose stool as directed on the sachet. Consult a pharmacist or clinical officer for infants.",
+    "manufacturerOrDistributor": "WHO / UNICEF / Ernest Chemists / Phyto-Riker",
+    "registrationNumber": "FDA/DR.2024-GH002",
     "referenceSource": {
       "name": "WHO Guidelines / Ghana National Diarrheal Disease Control Program",
       "jurisdiction": "GH",
@@ -120,6 +177,17 @@
       "Relief of inflammatory pain (e.g. arthritis, dental pain, dysmenorrhea/period pain)",
       "Reduction of fever where paracetamol is insufficient"
     ],
+    "activeIngredients": [
+      { "name": "Ibuprofen", "strength": "200 mg / 400 mg" }
+    ],
+    "availableForms": [
+      { "form": "Film-coated Tablet", "route": "Oral", "standardStrength": "200 mg, 400 mg" },
+      { "form": "Capsule / Liquid Gel", "route": "Oral", "standardStrength": "200 mg, 400 mg" },
+      { "form": "Oral Suspension", "route": "Oral", "standardStrength": "100 mg/5ml" },
+      { "form": "Topical Gel", "route": "Topical", "standardStrength": "5%" }
+    ],
+    "dosageForms": ["Tablet", "Capsule", "Oral Suspension", "Gel"],
+    "routes": ["Oral", "Topical"],
     "contraindications": [
       {
         "condition": "Active peptic ulcer disease or gastrointestinal bleeding",
@@ -150,6 +218,13 @@
       "isContraindicated": true,
       "warning": "Avoid during pregnancy, strictly contraindicated during the third trimester. Paracetamol is generally preferred. Consult your obstetrician."
     },
+    "breastfeedingPrecautions": {
+      "isContraindicated": false,
+      "warning": "Appears in breast milk in very low concentrations. Generally considered the NSAID of choice during lactation, but consult your physician."
+    },
+    "pediatricPrecautions": "Use weight-based dosing for pediatric syrup. Avoid in dehydrated children or those with chickenpox (varicella) due to rare risk of severe skin infections.",
+    "olderAdultPrecautions": "Elderly patients have higher risks of life-threatening gastrointestinal ulceration, heart failure exacerbation, and acute renal failure.",
+    "boxedWarning": "Cardiovascular Thrombotic Events & Gastrointestinal Bleeding: NSAIDs increase the risk of serious cardiovascular events including myocardial infarction and stroke, and serious GI bleeding, ulceration, and perforation.",
     "interactions": [
       {
         "medicineOrClass": "Warfarin / Anticoagulants",
@@ -167,17 +242,33 @@
         "severity": "moderate"
       }
     ],
+    "foodAlcoholInteractions": [
+      {
+        "item": "Alcohol",
+        "warning": "Concurrent alcohol intake dramatically increases gastric irritation and gastrointestinal bleeding risk.",
+        "severity": "major"
+      }
+    ],
     "commonSideEffects": [
       "Dyspepsia, stomach discomfort or heartburn",
       "Nausea",
       "Mild headache or dizziness"
+    ],
+    "seriousAdverseEffects": [
+      "Gastrointestinal bleeding, peptic ulcer perforation, hematemesis, melena (black tarry stools)",
+      "Acute kidney injury / fluid retention",
+      "Severe allergic bronchospasm (in aspirin-sensitive asthmatics)"
     ],
     "administrationWarnings": [
       "Always take with or immediately after food to minimize stomach irritation.",
       "Use the lowest effective dose for the shortest duration possible.",
       "Stop immediately and seek emergency care if you experience black tarry stools or vomit blood."
     ],
+    "storageAndHandling": "Store below 25°C in a dry place. Protect from moisture. Keep out of reach of children.",
     "dosageDisclaimer": "Dosage varies strictly by patient weight, age, and renal status. Consult a licensed pharmacist or physician for appropriate dosing.",
+    "manufacturerOrDistributor": "Reckitt Benckiser / Abbott / Ernest Chemists",
+    "registrationNumber": "FDA/DR.2024-GH003",
+    "officialLabelUrl": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=8045fb9d-5eb4-4e20-8049-74c76b927878",
     "referenceSource": {
       "name": "Ghana MoH Standard Treatment Guidelines / Ghana FDA Register",
       "jurisdiction": "GH",
@@ -197,6 +288,15 @@
       "Symptomatic relief of allergic rhinitis (sneezing, runny nose, itchy watery eyes)",
       "Relief of chronic urticaria (hives and skin allergy itching)"
     ],
+    "activeIngredients": [
+      { "name": "Cetirizine Dihydrochloride", "strength": "10 mg" }
+    ],
+    "availableForms": [
+      { "form": "Film-coated Tablet", "route": "Oral", "standardStrength": "10 mg" },
+      { "form": "Oral Solution / Syrup", "route": "Oral", "standardStrength": "5 mg/5ml, 1 mg/ml" }
+    ],
+    "dosageForms": ["Tablet", "Oral Solution", "Syrup"],
+    "routes": ["Oral"],
     "contraindications": [
       {
         "condition": "Severe renal impairment (creatinine clearance < 10 ml/min)",
@@ -217,10 +317,23 @@
       "isContraindicated": false,
       "warning": "Animal studies do not indicate direct harm, but should only be used in pregnancy if clinically necessary and approved by an obstetrician."
     },
+    "breastfeedingPrecautions": {
+      "isContraindicated": false,
+      "warning": "Passes into breast milk; may cause mild infant drowsiness. Use only if advised by a clinician."
+    },
+    "pediatricPrecautions": "Use oral drops or syrup formulated specifically for children aged 2-6 years with accurate measuring devices.",
+    "olderAdultPrecautions": "Consider dose reduction if renal function is reduced.",
     "interactions": [
       {
         "medicineOrClass": "Alcohol and CNS Depressants",
         "effect": "May enhance sedation, drowsiness, and impair mental alertness.",
+        "severity": "moderate"
+      }
+    ],
+    "foodAlcoholInteractions": [
+      {
+        "item": "Alcohol",
+        "warning": "Avoid alcoholic drinks as they compound drowsiness and impair psychomotor coordination.",
         "severity": "moderate"
       }
     ],
@@ -229,11 +342,18 @@
       "Dry mouth",
       "Mild headache"
     ],
+    "seriousAdverseEffects": [
+      "Severe acute hypersensitivity reactions",
+      "Severe somnolence or urinary retention in susceptible individuals"
+    ],
     "administrationWarnings": [
       "Although less sedating than first-generation antihistamines, patients should exercise caution when driving or operating machinery.",
       "Avoid alcohol during treatment."
     ],
+    "storageAndHandling": "Store below 25°C in a dry place. Protect from moisture and light. Keep out of reach of children.",
     "dosageDisclaimer": "Follow the product packaging leaflet. Consult a pharmacist for pediatric dosing.",
+    "manufacturerOrDistributor": "UCB Pharma / Cipla / Ernest Chemists",
+    "registrationNumber": "FDA/DR.2024-GH004",
     "referenceSource": {
       "name": "Ghana MoH Standard Treatment Guidelines",
       "jurisdiction": "GH",
@@ -252,6 +372,17 @@
     "approvedIndications": [
       "Treatment of acute uncomplicated malaria caused by Plasmodium falciparum"
     ],
+    "activeIngredients": [
+      { "name": "Artemether", "strength": "20 mg" },
+      { "name": "Lumefantrine", "strength": "120 mg" }
+    ],
+    "availableForms": [
+      { "form": "Tablet", "route": "Oral", "standardStrength": "20 mg / 120 mg" },
+      { "form": "Dispersible Tablet", "route": "Oral", "standardStrength": "20 mg / 120 mg (Pediatric)" },
+      { "form": "Forte Tablet", "route": "Oral", "standardStrength": "80 mg / 480 mg" }
+    ],
+    "dosageForms": ["Tablet", "Dispersible Tablet"],
+    "routes": ["Oral"],
     "contraindications": [
       {
         "condition": "Severe or complicated malaria",
@@ -277,10 +408,23 @@
       "isContraindicated": false,
       "warning": "In Ghana, ACTs are approved for uncomplicated malaria in the 2nd and 3rd trimesters. In the 1st trimester, consult a clinician for guideline-directed therapy."
     },
+    "breastfeedingPrecautions": {
+      "isContraindicated": false,
+      "warning": "Due to lack of comprehensive breast milk excretion data, consult a healthcare provider before use while nursing."
+    },
+    "pediatricPrecautions": "For young children, use dispersible tablets dissolved in a little water. Give with milk or fatty meal.",
+    "olderAdultPrecautions": "Check ECG or cardiac status if patient is taking concomitant antiarrhythmic or QT-prolonging medicines.",
     "interactions": [
       {
         "medicineOrClass": "Erythromycin / Ketoconazole / QT-prolonging drugs",
         "effect": "Substantially increases lumefantrine serum levels and risk of cardiac dysrhythmias.",
+        "severity": "major"
+      }
+    ],
+    "foodAlcoholInteractions": [
+      {
+        "item": "Fatty Food / Milk",
+        "warning": "MUST be taken with food or fat-containing liquid (milk) because lumefantrine oral absorption increases by over 10-fold with fat.",
         "severity": "major"
       }
     ],
@@ -289,13 +433,22 @@
       "Loss of appetite, mild abdominal discomfort",
       "Cough in pediatric patients"
     ],
+    "seriousAdverseEffects": [
+      "Cardiac QT interval prolongation / arrhythmia",
+      "Severe acute hypersensitivity or anaphylaxis",
+      "Delayed hemolytic anemia (rare)"
+    ],
     "administrationWarnings": [
       "MUST BE PRECEDED BY A LABORATORY TEST: In Ghana, antimalarial policy strictly requires confirming malaria parasites (via RDT or microscopy) before treatment.",
       "Take with meals or drinks containing fat (e.g. milk, soup) to ensure adequate lumefantrine absorption.",
       "The full 3-day course of 6 doses must be completed even if symptoms resolve quickly.",
       "Clinix does not prescribe or dispense antimalarials. Please see a healthcare professional."
     ],
+    "storageAndHandling": "Store below 30°C in original blister pack. Protect from light and moisture. Keep out of reach of children.",
     "dosageDisclaimer": "Dosing depends on precise patient weight band (5-14kg, 15-24kg, 25-34kg, >35kg) over a strict 6-dose schedule. A pharmacist or clinic must calculate and supervise this.",
+    "manufacturerOrDistributor": "Novartis / Bliss GVS / Ernest Chemists",
+    "registrationNumber": "FDA/DR.2024-GH005",
+    "officialLabelUrl": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=e272a853-43f6-4993-9c88-662ee2e5fc6c",
     "referenceSource": {
       "name": "Ghana National Malaria Elimination Programme (NMEP) / MoH Guidelines",
       "jurisdiction": "GH",
@@ -314,6 +467,16 @@
     "approvedIndications": [
       "Treatment of susceptible bacterial infections (e.g. otitis media, streptococcal pharyngitis, community-acquired pneumonia, urinary tract infections)"
     ],
+    "activeIngredients": [
+      { "name": "Amoxicillin Trihydrate", "strength": "250 mg / 500 mg" }
+    ],
+    "availableForms": [
+      { "form": "Capsule", "route": "Oral", "standardStrength": "250 mg, 500 mg" },
+      { "form": "Dispersible Tablet", "route": "Oral", "standardStrength": "125 mg, 250 mg" },
+      { "form": "Powder for Oral Suspension", "route": "Oral", "standardStrength": "125 mg/5ml, 250 mg/5ml" }
+    ],
+    "dosageForms": ["Capsule", "Tablet", "Oral Suspension"],
+    "routes": ["Oral"],
     "contraindications": [
       {
         "condition": "Severe hypersensitivity / anaphylaxis to penicillins or beta-lactams",
@@ -334,6 +497,12 @@
       "isContraindicated": false,
       "warning": "Generally considered acceptable during pregnancy when clinically indicated. Must be prescribed by a physician."
     },
+    "breastfeedingPrecautions": {
+      "isContraindicated": false,
+      "warning": "Trace amounts pass into breast milk; may occasionally cause loose stools or thrush in the infant. Compatible with lactation under doctor supervision."
+    },
+    "pediatricPrecautions": "Reconstituted liquid suspensions must be stored in a refrigerator or cool area and shaken well before each use. Complete full treatment course.",
+    "olderAdultPrecautions": "Assess renal function as amoxicillin is renally cleared; dose adjustment may be required in severe chronic kidney disease.",
     "interactions": [
       {
         "medicineOrClass": "Methotrexate",
@@ -346,9 +515,15 @@
         "severity": "moderate"
       }
     ],
+    "foodAlcoholInteractions": [],
     "commonSideEffects": [
       "Diarrhea, nausea, loose stools",
       "Mild skin rash"
+    ],
+    "seriousAdverseEffects": [
+      "Severe acute anaphylactic shock (airway swelling, hypotension)",
+      "Clostridioides difficile-associated colitis (severe persistent watery diarrhea)",
+      "Severe cutaneous adverse reactions (DRESS, SJS/TEN)"
     ],
     "administrationWarnings": [
       "PRESCRIPTION ONLY: Antibiotics must never be taken without a formal clinical examination and valid prescription.",
@@ -356,7 +531,11 @@
       "Complete the entire prescribed duration to prevent antimicrobial resistance.",
       "Clinix does not prescribe or calculate doses for antibiotics."
     ],
+    "storageAndHandling": "Store dry capsules below 25°C. Store reconstituted oral suspension in a refrigerator (2°C - 8°C) or cool place and discard unused remainder after 7-14 days as stated on label.",
     "dosageDisclaimer": "Dosage must be determined solely by an authorized medical practitioner. Clinix does not calculate antibiotic dosages.",
+    "manufacturerOrDistributor": "GSK / Sandoz / Ernest Chemists / Kinapharma",
+    "registrationNumber": "FDA/DR.2024-GH006",
+    "officialLabelUrl": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=68686d11-c918-49d6-8488-8e6587c4f469",
     "referenceSource": {
       "name": "Ghana MoH Standard Treatment Guidelines / WHO Essential Medicines",
       "jurisdiction": "GH",
@@ -375,6 +554,17 @@
     "approvedIndications": [
       "Symptomatic relief of acid indigestion, heartburn, and dyspepsia"
     ],
+    "activeIngredients": [
+      { "name": "Magnesium Trisilicate", "strength": "250 mg" },
+      { "name": "Aluminium Hydroxide", "strength": "120 mg" },
+      { "name": "Simethicone", "strength": "25 mg" }
+    ],
+    "availableForms": [
+      { "form": "Chewable Tablet", "route": "Oral", "standardStrength": "Compound chewable tablet" },
+      { "form": "Oral Suspension", "route": "Oral", "standardStrength": "Compound liquid suspension" }
+    ],
+    "dosageForms": ["Chewable Tablet", "Oral Suspension"],
+    "routes": ["Oral"],
     "contraindications": [
       {
         "condition": "Severe renal failure",
@@ -395,6 +585,12 @@
       "isContraindicated": false,
       "warning": "Generally considered acceptable for short-term heartburn in pregnancy, but avoid high chronic doses. Consult a midwife or doctor."
     },
+    "breastfeedingPrecautions": {
+      "isContraindicated": false,
+      "warning": "Considered compatible with breastfeeding when used in recommended amounts."
+    },
+    "pediatricPrecautions": "Do not give to infants or young children under 6 without clinical supervision.",
+    "olderAdultPrecautions": "May cause constipation or diarrhea; check renal impairment status before regular use.",
     "interactions": [
       {
         "medicineOrClass": "Ciprofloxacin / Tetracycline / Fluoroquinolone antibiotics",
@@ -407,16 +603,24 @@
         "severity": "moderate"
       }
     ],
+    "foodAlcoholInteractions": [],
     "commonSideEffects": [
       "Mild diarrhea (magnesium) or constipation (aluminum)",
       "Belching or bloating"
+    ],
+    "seriousAdverseEffects": [
+      "Hypermagnesemia (in severe kidney failure)",
+      "Electrolyte imbalance with chronic overuse"
     ],
     "administrationWarnings": [
       "Chew tablets thoroughly before swallowing or mix powder with water as directed.",
       "Do not take within 2 hours of taking other oral medications.",
       "If heartburn or indigestion persists for more than 14 days, see a doctor to rule out ulcer disease or cardiac causes."
     ],
+    "storageAndHandling": "Store below 30°C in a tightly closed container. Protect from moisture. Keep out of reach of children.",
     "dosageDisclaimer": "Follow packaging instructions. Consult your pharmacist if symptoms recur frequently.",
+    "manufacturerOrDistributor": "Ernest Chemists / Kinapharma / Phyto-Riker",
+    "registrationNumber": "FDA/DR.2024-GH007",
     "referenceSource": {
       "name": "Ghana MoH Standard Treatment Guidelines",
       "jurisdiction": "GH",
@@ -436,6 +640,16 @@
       "Adult relief of mild to moderate pain and headache",
       "Cardiovascular secondary prevention (low-dose under medical supervision only)"
     ],
+    "activeIngredients": [
+      { "name": "Acetylsalicylic Acid", "strength": "75 mg / 81 mg / 300 mg / 500 mg" }
+    ],
+    "availableForms": [
+      { "form": "Enteric-coated Tablet", "route": "Oral", "standardStrength": "75 mg, 81 mg, 100 mg (Cardio low-dose)" },
+      { "form": "Dispersible Tablet", "route": "Oral", "standardStrength": "300 mg (Pain / Acute emergency)" },
+      { "form": "Standard Tablet", "route": "Oral", "standardStrength": "300 mg, 500 mg" }
+    ],
+    "dosageForms": ["Tablet", "Dispersible Tablet", "Enteric-coated Tablet"],
+    "routes": ["Oral"],
     "contraindications": [
       {
         "condition": "Children and teenagers under 16 years of age",
@@ -461,6 +675,12 @@
       "isContraindicated": true,
       "warning": "High-dose analgesic aspirin is contraindicated in pregnancy, especially during the 3rd trimester. Low-dose preventive aspirin is strictly by specialist obstetric prescription."
     },
+    "breastfeedingPrecautions": {
+      "isContraindicated": true,
+      "warning": "Aspirin passes into breast milk and poses a theoretical risk of Reye's syndrome in the infant. Avoid during lactation; paracetamol or ibuprofen is preferred."
+    },
+    "pediatricPrecautions": "STRICT CONTRAINDICATION: Never administer to children or teenagers for fever or viral infections.",
+    "olderAdultPrecautions": "Higher incidence of silent gastrointestinal bleeding; requires gastroprotection review by clinician.",
     "interactions": [
       {
         "medicineOrClass": "Warfarin / Heparin / Anticoagulants",
@@ -473,16 +693,32 @@
         "severity": "major"
       }
     ],
+    "foodAlcoholInteractions": [
+      {
+        "item": "Alcohol",
+        "warning": "Greatly increases gastric mucosal damage and upper gastrointestinal bleeding.",
+        "severity": "major"
+      }
+    ],
     "commonSideEffects": [
       "Stomach irritation, nausea, indigestion",
       "Increased bleeding tendency"
+    ],
+    "seriousAdverseEffects": [
+      "Reye's syndrome in pediatric patients (acute brain swelling and liver failure)",
+      "Major gastrointestinal ulceration and hemorrhage",
+      "Severe salicylate toxicity (salicylism: tinnitus, hyperventilation, metabolic acidosis)"
     ],
     "administrationWarnings": [
       "Strictly prohibited in patients under 16 years of age with viral infections or fever.",
       "Take after meals with a full glass of water.",
       "Discontinue and seek urgent medical evaluation if tinnitus (ringing in ears) or black tarry stools develop."
     ],
+    "storageAndHandling": "Store below 25°C in a dry place. Discontinue if tablet smells strongly of vinegar (acetic acid breakdown). Keep out of reach of children.",
     "dosageDisclaimer": "Clinix does not calculate dosages. Always check the packaging leaflet and consult a registered pharmacist.",
+    "manufacturerOrDistributor": "Bayer / Reckitt / Ernest Chemists",
+    "registrationNumber": "FDA/DR.2024-GH008",
+    "officialLabelUrl": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=255755ca-d4f1-4a41-b016-8c5e005086ee",
     "referenceSource": {
       "name": "Ghana MoH Standard Treatment Guidelines / British Pharmacopoeia",
       "jurisdiction": "GH",
@@ -501,6 +737,16 @@
     "approvedIndications": [
       "Treatment of susceptible anaerobic bacterial infections and protozoal infections (e.g. amoebiasis, giardiasis, trichomoniasis)"
     ],
+    "activeIngredients": [
+      { "name": "Metronidazole", "strength": "200 mg / 400 mg / 500 mg" }
+    ],
+    "availableForms": [
+      { "form": "Film-coated Tablet", "route": "Oral", "standardStrength": "200 mg, 400 mg, 500 mg" },
+      { "form": "Oral Suspension", "route": "Oral", "standardStrength": "200 mg/5ml (as Metronidazole Benzoate)" },
+      { "form": "Vaginal Pessary / Suppository", "route": "Vaginal", "standardStrength": "500 mg" }
+    ],
+    "dosageForms": ["Tablet", "Oral Suspension", "Pessary"],
+    "routes": ["Oral", "Vaginal"],
     "contraindications": [
       {
         "condition": "Severe hypersensitivity to metronidazole or nitroimidazoles",
@@ -521,6 +767,12 @@
       "isContraindicated": true,
       "warning": "Avoid during the first trimester of pregnancy unless considered essential by an obstetrician. Consult your doctor."
     },
+    "breastfeedingPrecautions": {
+      "isContraindicated": true,
+      "warning": "Passes into breast milk in significant amounts and imparts a bitter taste; avoid high-dose single regimen or express and discard milk for 24-48 hours after treatment."
+    },
+    "pediatricPrecautions": "For pediatric suspension, shake thoroughly before pouring each dose. Follow exact doctor prescription.",
+    "olderAdultPrecautions": "Metronidazole is metabolized by the liver; monitoring recommended in older adults with hepatic dysfunction.",
     "interactions": [
       {
         "medicineOrClass": "Alcohol (and alcohol-containing medicines)",
@@ -533,17 +785,33 @@
         "severity": "major"
       }
     ],
+    "foodAlcoholInteractions": [
+      {
+        "item": "Alcohol",
+        "warning": "STRICTLY PROHIBITED: Inhibits aldehyde dehydrogenase leading to violent nausea, vomiting, facial flushing, palpitations, and sudden drop in blood pressure. Avoid all alcohol during and for 48 hours post-treatment.",
+        "severity": "critical"
+      }
+    ],
     "commonSideEffects": [
       "Unpleasant metallic taste in the mouth",
       "Nausea, epigastric discomfort",
       "Darkened or reddish-brown urine (harmless)"
+    ],
+    "seriousAdverseEffects": [
+      "Severe peripheral neuropathy (numbness, tingling in extremities with prolonged use)",
+      "Central nervous system toxicity (convulsions, encephalopathy, ataxia)",
+      "Severe disulfiram-like reaction if alcohol ingested"
     ],
     "administrationWarnings": [
       "PRESCRIPTION ONLY: Requires clinical diagnosis and prescription by a licensed practitioner.",
       "Strictly avoid all alcohol during treatment and for at least 48 hours after the last dose.",
       "Take with or after food with a full glass of water."
     ],
+    "storageAndHandling": "Store below 25°C in a dry place. Protect from light. Keep out of reach of children.",
     "dosageDisclaimer": "Requires prescription and weight/clinical indication determination by a clinician. Clinix does not calculate doses.",
+    "manufacturerOrDistributor": "Sanofi / Unique Pharmaceuticals / Ernest Chemists",
+    "registrationNumber": "FDA/DR.2024-GH009",
+    "officialLabelUrl": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=295e921b-252f-455b-80aa-eb2b534d4fd3",
     "referenceSource": {
       "name": "Ghana MoH Standard Treatment Guidelines / WHO Model List",
       "jurisdiction": "GH",
@@ -562,6 +830,15 @@
     "approvedIndications": [
       "Symptomatic relief of allergic reactions, insect bites, acute urticaria, allergic rhinitis"
     ],
+    "activeIngredients": [
+      { "name": "Chlorpheniramine Maleate", "strength": "4 mg" }
+    ],
+    "availableForms": [
+      { "form": "Tablet", "route": "Oral", "standardStrength": "4 mg" },
+      { "form": "Syrup", "route": "Oral", "standardStrength": "2 mg/5ml" }
+    ],
+    "dosageForms": ["Tablet", "Syrup"],
+    "routes": ["Oral"],
     "contraindications": [
       {
         "condition": "Narrow-angle glaucoma or urinary retention (e.g. prostatic hypertrophy)",
@@ -582,6 +859,12 @@
       "isContraindicated": false,
       "warning": "Use only if clearly needed and advised by a medical doctor. May cause neonatal irritability or tremors if taken in late pregnancy."
     },
+    "breastfeedingPrecautions": {
+      "isContraindicated": false,
+      "warning": "Small amounts pass into milk; may cause drowsiness in infant or reduce maternal prolactin/milk supply."
+    },
+    "pediatricPrecautions": "Young children may paradoxically experience excitement or agitation rather than sedation.",
+    "olderAdultPrecautions": "Significantly higher risk of confusion, dizziness, falls, urinary retention, and constipation due to anticholinergic effects.",
     "interactions": [
       {
         "medicineOrClass": "Alcohol, Sedatives, Hypnotics",
@@ -589,18 +872,517 @@
         "severity": "major"
       }
     ],
+    "foodAlcoholInteractions": [
+      {
+        "item": "Alcohol",
+        "warning": "Potentiates severe sedation and impairment. Concomitant use is strongly discouraged.",
+        "severity": "major"
+      }
+    ],
     "commonSideEffects": [
       "Drowsiness, sedation, impaired concentration",
       "Dry mouth, blurred vision"
+    ],
+    "seriousAdverseEffects": [
+      "Acute urinary retention in patients with prostatic enlargement",
+      "Severe respiratory depression if combined with other central depressants"
     ],
     "administrationWarnings": [
       "Causes marked drowsiness: DO NOT drive, ride a bicycle, or operate machinery while taking this medicine.",
       "Avoid alcoholic beverages entirely.",
       "Keep strictly out of reach of children."
     ],
+    "storageAndHandling": "Store below 25°C in a dry place. Protect from light. Keep out of reach of children.",
     "dosageDisclaimer": "Consult product packaging leaflet or speak with your pharmacist for age-appropriate guidance.",
+    "manufacturerOrDistributor": "GSK / Ernest Chemists / Phyto-Riker",
+    "registrationNumber": "FDA/DR.2024-GH010",
     "referenceSource": {
       "name": "Ghana MoH Standard Treatment Guidelines",
+      "jurisdiction": "GH",
+      "version": "2024-v1",
+      "sourceUrl": "https://www.fdaghana.gov.gh",
+      "lastReviewedAt": "2026-01-15T00:00:00.000Z",
+      "reviewedBy": "Dr. K. Mensah, Clinical Reviewer"
+    }
+  },
+  {
+    "id": "GH-MED-011",
+    "genericName": "Omeprazole",
+    "brandNames": ["Prilosec", "Losec", "Omez", "Gasec"],
+    "therapeuticClass": "Proton Pump Inhibitor (PPI) Antisecretory",
+    "classification": "over_the_counter",
+    "approvedIndications": [
+      "Relief of frequent heartburn (acid indigestion) and gastroesophageal reflux disease (GERD)",
+      "Treatment of gastric and duodenal ulcers under clinical supervision"
+    ],
+    "activeIngredients": [
+      { "name": "Omeprazole", "strength": "20 mg / 40 mg" }
+    ],
+    "availableForms": [
+      { "form": "Delayed-release Capsule", "route": "Oral", "standardStrength": "20 mg, 40 mg" },
+      { "form": "Enteric-coated Tablet", "route": "Oral", "standardStrength": "20 mg" }
+    ],
+    "dosageForms": ["Capsule", "Tablet"],
+    "routes": ["Oral"],
+    "contraindications": [
+      {
+        "condition": "Severe hypersensitivity to omeprazole or substituted benzimidazoles",
+        "explanation": "Risk of acute hypersensitivity reactions and anaphylaxis.",
+        "severity": "critical"
+      },
+      {
+        "condition": "Concurrent rilpivirine or clopidogrel without clinician review",
+        "explanation": "Significantly decreases active metabolite levels of clopidogrel and absorption of rilpivirine.",
+        "severity": "warning"
+      }
+    ],
+    "ageRestrictions": {
+      "minAgeYears": 18,
+      "warning": "OTC self-care omeprazole is indicated for adults 18 years and older. Pediatric GERD requires specialist pediatric prescription."
+    },
+    "pregnancyPrecautions": {
+      "isContraindicated": false,
+      "warning": "Epidemiological studies indicate no increased teratogenic risk; however, use during pregnancy should be reviewed by a clinician."
+    },
+    "breastfeedingPrecautions": {
+      "isContraindicated": false,
+      "warning": "Excreted in low levels in breast milk; unlikely to affect a nursing infant at normal doses. Consult doctor."
+    },
+    "pediatricPrecautions": "Prescription use only in pediatric gastroesophageal reflux.",
+    "olderAdultPrecautions": "Prolonged use (>1 year) in older adults may increase the risk of bone fractures (osteoporosis) and vitamin B12 deficiency.",
+    "interactions": [
+      {
+        "medicineOrClass": "Clopidogrel",
+        "effect": "Omeprazole inhibits CYP2C19, decreasing clopidogrel activation and antiplatelet efficacy.",
+        "severity": "major"
+      },
+      {
+        "medicineOrClass": "Ketoconazole / Itraconazole / Iron salts",
+        "effect": "Reduced gastric acid inhibits oral absorption of drugs requiring acidic pH.",
+        "severity": "moderate"
+      }
+    ],
+    "foodAlcoholInteractions": [
+      {
+        "item": "Food Timing",
+        "warning": "Best taken in the morning 30 to 60 minutes before breakfast for optimal acid pump inhibition.",
+        "severity": "minor"
+      }
+    ],
+    "commonSideEffects": [
+      "Headache",
+      "Abdominal pain, constipation, diarrhea, flatulence",
+      "Nausea or vomiting"
+    ],
+    "seriousAdverseEffects": [
+      "Clostridioides difficile-associated diarrhea",
+      "Acute interstitial nephritis (kidney inflammation)",
+      "Severe hypomagnesemia with long-term use"
+    ],
+    "administrationWarnings": [
+      "Swallow capsules whole with a glass of water. Do not crush or chew the enteric-coated pellets.",
+      "For OTC self-treatment of frequent heartburn, do not take for more than 14 days without clinician evaluation.",
+      "Seek medical care if you have trouble swallowing, persistent vomiting, or unexplained weight loss."
+    ],
+    "storageAndHandling": "Store below 25°C in a dry place. Keep container tightly closed to protect from moisture. Keep out of reach of children.",
+    "dosageDisclaimer": "Individual dosage and duration must be advised by a pharmacist or doctor. Do not exceed 14 consecutive days of self-care without medical review.",
+    "manufacturerOrDistributor": "AstraZeneca / Dr. Reddy's / Ernest Chemists",
+    "registrationNumber": "FDA/DR.2024-GH011",
+    "officialLabelUrl": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=29db1951-dcfa-4f93-b67f-4ea6718a9947",
+    "referenceSource": {
+      "name": "Ghana MoH Standard Treatment Guidelines / British National Formulary",
+      "jurisdiction": "GH",
+      "version": "2024-v1",
+      "sourceUrl": "https://www.fdaghana.gov.gh",
+      "lastReviewedAt": "2026-01-15T00:00:00.000Z",
+      "reviewedBy": "Dr. K. Mensah, Clinical Reviewer"
+    }
+  },
+  {
+    "id": "GH-MED-012",
+    "genericName": "Salbutamol",
+    "brandNames": ["Ventolin", "Asthalin", "Aerolin", "Proventil"],
+    "therapeuticClass": "Short-Acting Beta-2 Adrenergic Agonist (SABA) Bronchodilator",
+    "classification": "prescription_only",
+    "approvedIndications": [
+      "Quick relief of acute bronchospasm in asthma, chronic obstructive pulmonary disease (COPD)",
+      "Prevention of exercise-induced bronchospasm"
+    ],
+    "activeIngredients": [
+      { "name": "Salbutamol (Albuterol) Sulfate", "strength": "100 mcg per metered actuation" }
+    ],
+    "availableForms": [
+      { "form": "Pressurized Metered Dose Inhaler (pMDI)", "route": "Inhalation", "standardStrength": "100 mcg / actuation (200 doses)" },
+      { "form": "Oral Syrup", "route": "Oral", "standardStrength": "2 mg/5ml" },
+      { "form": "Oral Tablet", "route": "Oral", "standardStrength": "2 mg, 4 mg" },
+      { "form": "Nebulizer Solution", "route": "Inhalation", "standardStrength": "2.5 mg / 2.5ml, 5 mg / 2.5ml" }
+    ],
+    "dosageForms": ["Inhaler", "Nebulizer Solution", "Syrup", "Tablet"],
+    "routes": ["Inhalation", "Oral"],
+    "contraindications": [
+      {
+        "condition": "Severe hypersensitivity to salbutamol or fluorocarbon propellants",
+        "explanation": "Risk of acute paradoxical bronchospasm or allergic angioedema.",
+        "severity": "critical"
+      },
+      {
+        "condition": "Severe untreated thyrotoxicosis or tachyarrhythmias",
+        "explanation": "Beta-stimulation can precipitate severe cardiac arrhythmias or thyroid storm.",
+        "severity": "critical"
+      }
+    ],
+    "ageRestrictions": {
+      "minAgeYears": 0.5,
+      "warning": "Infants and children under 5 should use a metered dose inhaler connected to an age-appropriate spacer device with face mask."
+    },
+    "pregnancyPrecautions": {
+      "isContraindicated": false,
+      "warning": "Inhaled salbutamol is the preferred rescue bronchodilator during pregnancy. Poorly controlled maternal asthma poses far greater risk to fetus than inhaled treatment."
+    },
+    "breastfeedingPrecautions": {
+      "isContraindicated": false,
+      "warning": "Inhaled salbutamol is considered safe during lactation as systemic absorption is low."
+    },
+    "pediatricPrecautions": "Always use a spacer device for children to ensure proper lung deposition. If child needs inhaler more than twice weekly, asthma review is needed.",
+    "olderAdultPrecautions": "Higher susceptibility to tachycardia, tremors, and hypokalemia; monitor in patients with coronary artery disease.",
+    "interactions": [
+      {
+        "medicineOrClass": "Non-selective Beta-blockers (e.g. Propranolol)",
+        "effect": "Beta-blockers antagonize salbutamol bronchodilation and can trigger severe, life-threatening bronchospasm in asthmatics.",
+        "severity": "major"
+      },
+      {
+        "medicineOrClass": "Loop or Thiazide Diuretics (e.g. Furosemide)",
+        "effect": "Additive risk of hypokalemia (low potassium).",
+        "severity": "moderate"
+      }
+    ],
+    "foodAlcoholInteractions": [],
+    "commonSideEffects": [
+      "Fine skeletal muscle tremor (especially hands)",
+      "Tachycardia (fast heartbeat) or palpitations",
+      "Mild headache or nervousness"
+    ],
+    "seriousAdverseEffects": [
+      "Paradoxical bronchospasm (sudden airway narrowing immediately following inhalation)",
+      "Severe hypokalemia with high doses",
+      "Cardiac arrhythmias in susceptible patients"
+    ],
+    "administrationWarnings": [
+      "RESCUE INHALER: Shake inhaler well before each puff. Exhale fully, place mouthpiece in mouth, press canister while breathing in deeply and slowly, then hold breath for 10 seconds.",
+      "If you need to use your rescue inhaler more than 2-3 times per week, your asthma is uncontrolled and you must see a doctor for controller therapy.",
+      "EMERGENCY WARNING: If inhaler fails to relieve severe shortness of breath or blue lips occur, call 112 immediately."
+    ],
+    "storageAndHandling": "Store below 30°C. Protect from frost and direct sunlight. Keep mouthpiece cap securely in place. Do not puncture or burn canister.",
+    "dosageDisclaimer": "Rescue dosing must follow your asthma action plan prescribed by your doctor. Clinix does not calculate acute asthma doses.",
+    "manufacturerOrDistributor": "GSK / Cipla / Ernest Chemists",
+    "registrationNumber": "FDA/DR.2024-GH012",
+    "officialLabelUrl": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=2ca4e815-5858-47bc-87c2-1e9d1e345e65",
+    "referenceSource": {
+      "name": "Global Initiative for Asthma (GINA) / Ghana MoH Guidelines",
+      "jurisdiction": "GH",
+      "version": "2024-v1",
+      "sourceUrl": "https://www.fdaghana.gov.gh",
+      "lastReviewedAt": "2026-01-15T00:00:00.000Z",
+      "reviewedBy": "Dr. K. Mensah, Clinical Reviewer"
+    }
+  },
+  {
+    "id": "GH-MED-013",
+    "genericName": "Ciprofloxacin",
+    "brandNames": ["Cipro", "Cifran", "Ciproxin", "Ciprolet"],
+    "therapeuticClass": "Fluoroquinolone Broad-Spectrum Antibacterial",
+    "classification": "prescription_only",
+    "approvedIndications": [
+      "Treatment of severe or complicated urinary tract infections, typhoid fever, bacterial prostatitis, and complicated intra-abdominal infections"
+    ],
+    "activeIngredients": [
+      { "name": "Ciprofloxacin Hydrochloride", "strength": "250 mg / 500 mg" }
+    ],
+    "availableForms": [
+      { "form": "Film-coated Tablet", "route": "Oral", "standardStrength": "250 mg, 500 mg, 750 mg" },
+      { "form": "Eye/Ear Drops", "route": "Ophthalmic/Otic", "standardStrength": "0.3%" },
+      { "form": "Intravenous Infusion", "route": "Intravenous", "standardStrength": "2 mg/ml (200 mg / 100ml)" }
+    ],
+    "dosageForms": ["Tablet", "Drops", "Infusion"],
+    "routes": ["Oral", "Ophthalmic", "Otic", "Intravenous"],
+    "contraindications": [
+      {
+        "condition": "Concurrent administration with tizanidine",
+        "explanation": "Significantly increases tizanidine blood levels, risking severe hypotension and excessive sedation.",
+        "severity": "critical"
+      },
+      {
+        "condition": "History of tendon disorders related to fluoroquinolone administration",
+        "explanation": "Substantially elevated risk of tendon rupture, particularly the Achilles tendon.",
+        "severity": "critical"
+      },
+      {
+        "condition": "Myasthenia gravis",
+        "explanation": "May exacerbate muscle weakness and trigger life-threatening respiratory failure.",
+        "severity": "critical"
+      }
+    ],
+    "ageRestrictions": {
+      "minAgeYears": 18,
+      "warning": "Generally avoided in growing children and adolescents under 18 due to animal arthropathy concerns, except for specific severe indications (e.g. complicated pseudomonal UTI or cystic fibrosis) by pediatric specialists."
+    },
+    "pregnancyPrecautions": {
+      "isContraindicated": true,
+      "warning": "Avoid during pregnancy due to potential cartilage damage in the developing fetus. Use alternative beta-lactam antibiotics unless no alternative exists."
+    },
+    "breastfeedingPrecautions": {
+      "isContraindicated": true,
+      "warning": "Excreted in human milk; avoid during breastfeeding or use safer alternative antibacterials."
+    },
+    "pediatricPrecautions": "Reserved strictly for specialist pediatric use in refractory infections.",
+    "olderAdultPrecautions": "Substantially increased risk of severe tendon rupture (especially if taking corticosteroids) and aortic aneurysm/dissection.",
+    "boxedWarning": "Serious Adverse Reactions: Fluoroquinolones are associated with disabling and potentially irreversible adverse reactions including tendinitis and tendon rupture, peripheral neuropathy, and CNS toxic effects. Reserve for infections without alternative treatment options.",
+    "interactions": [
+      {
+        "medicineOrClass": "Antacids (Magnesium/Aluminum), Iron supplements, Calcium",
+        "effect": "Chelation dramatically reduces oral ciprofloxacin bioavailability by up to 90%. Administer ciprofloxacin at least 2 hours before or 6 hours after antacids/minerals.",
+        "severity": "major"
+      },
+      {
+        "medicineOrClass": "Theophylline",
+        "effect": "Ciprofloxacin inhibits theophylline clearance, causing potentially fatal theophylline toxicity and seizures.",
+        "severity": "major"
+      },
+      {
+        "medicineOrClass": "Warfarin",
+        "effect": "Enhances warfarin anticoagulant effect; frequent INR monitoring required.",
+        "severity": "major"
+      }
+    ],
+    "foodAlcoholInteractions": [
+      {
+        "item": "Dairy Products / Calcium-fortified juices",
+        "warning": "Avoid taking with dairy products alone (milk, yogurt) as calcium binds ciprofloxacin, drastically reducing absorption.",
+        "severity": "major"
+      }
+    ],
+    "commonSideEffects": [
+      "Nausea, diarrhea, abdominal pain",
+      "Mild headache or dizziness"
+    ],
+    "seriousAdverseEffects": [
+      "Achilles tendinitis or tendon rupture (can occur during or months after therapy)",
+      "Peripheral neuropathy (burning pain, tingling, numbness)",
+      "QT prolongation / ventricular arrhythmias",
+      "Central nervous system effects (seizures, severe confusion, hallucinations)"
+    ],
+    "administrationWarnings": [
+      "PRESCRIPTION ONLY: Strictly requires a clinician's diagnostic evaluation and prescription.",
+      "Drink plenty of water to maintain adequate hydration and prevent crystalluria.",
+      "Stop taking immediately and avoid exercise if pain, swelling, or tenderness develops in a tendon.",
+      "Avoid excessive sunlight or UV lamps due to photosensitivity."
+    ],
+    "storageAndHandling": "Store below 25°C in a dry place. Protect from light. Keep out of reach of children.",
+    "dosageDisclaimer": "Dosing must be strictly determined by a licensed medical practitioner. Clinix does not calculate antibiotic dosages.",
+    "manufacturerOrDistributor": "Bayer / Cipla / Ernest Chemists",
+    "registrationNumber": "FDA/DR.2024-GH013",
+    "officialLabelUrl": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=a01ea187-578b-4c7c-87d2-7c3e56c5476a",
+    "referenceSource": {
+      "name": "Ghana MoH Standard Treatment Guidelines / US FDA Boxed Warning Database",
+      "jurisdiction": "GH",
+      "version": "2024-v1",
+      "sourceUrl": "https://www.fdaghana.gov.gh",
+      "lastReviewedAt": "2026-01-15T00:00:00.000Z",
+      "reviewedBy": "Dr. K. Mensah, Clinical Reviewer"
+    }
+  },
+  {
+    "id": "GH-MED-014",
+    "genericName": "Metformin",
+    "brandNames": ["Glucophage", "Diabex", "Formin", "Metfor"],
+    "therapeuticClass": "Biguanide Oral Antidiabetic",
+    "classification": "prescription_only",
+    "approvedIndications": [
+      "Management of type 2 diabetes mellitus, especially in overweight patients, alongside diet and exercise"
+    ],
+    "activeIngredients": [
+      { "name": "Metformin Hydrochloride", "strength": "500 mg / 850 mg / 1000 mg" }
+    ],
+    "availableForms": [
+      { "form": "Immediate-release Film-coated Tablet", "route": "Oral", "standardStrength": "500 mg, 850 mg, 1000 mg" },
+      { "form": "Extended-release Tablet (XR)", "route": "Oral", "standardStrength": "500 mg, 750 mg, 1000 mg" }
+    ],
+    "dosageForms": ["Tablet", "Extended-release Tablet"],
+    "routes": ["Oral"],
+    "contraindications": [
+      {
+        "condition": "Severe renal impairment (eGFR < 30 mL/min/1.73m²)",
+        "explanation": "Metformin is excreted unchanged by the kidneys; severe impairment leads to drug accumulation and high risk of life-threatening lactic acidosis.",
+        "severity": "critical"
+      },
+      {
+        "condition": "Acute or chronic metabolic acidosis (including diabetic ketoacidosis)",
+        "explanation": "Exacerbates life-threatening systemic acidosis.",
+        "severity": "critical"
+      },
+      {
+        "condition": "Severe hepatic failure, acute heart failure, or severe tissue hypoxia",
+        "explanation": "Substantially increases lactate production and impairs lactate clearance.",
+        "severity": "critical"
+      }
+    ],
+    "ageRestrictions": {
+      "minAgeYears": 10,
+      "warning": "Approved for children 10 years and older with type 2 diabetes under specialized pediatric endocrinology care."
+    },
+    "pregnancyPrecautions": {
+      "isContraindicated": false,
+      "warning": "Insulin is the primary guideline recommendation for diabetes in pregnancy, though metformin is sometimes used under specialist supervision. Consult your endocrinologist."
+    },
+    "breastfeedingPrecautions": {
+      "isContraindicated": false,
+      "warning": "Excreted into breast milk in low concentrations; considered compatible with breastfeeding under medical guidance."
+    },
+    "pediatricPrecautions": "For pediatric type 2 diabetes, strictly follow specialist pediatric titration schedules.",
+    "olderAdultPrecautions": "Renal function must be regularly monitored; avoid in patients aged >80 years unless renal function is documented normal.",
+    "boxedWarning": "Lactic Acidosis: A rare but severe and potentially fatal metabolic complication characterized by elevated blood lactate levels, malaise, myalgias, respiratory distress, and abdominal distress. Risk increases with renal impairment, sepsis, and alcohol abuse.",
+    "interactions": [
+      {
+        "medicineOrClass": "Iodinated Radiocontrast Media",
+        "effect": "Contrast-induced acute renal failure can cause massive metformin accumulation and fatal lactic acidosis. Withhold metformin at or before procedure.",
+        "severity": "major"
+      },
+      {
+        "medicineOrClass": "Cimetidine / Carbonic Anhydrase Inhibitors",
+        "effect": "Increases metformin plasma concentration or promotes lactic acidosis.",
+        "severity": "moderate"
+      }
+    ],
+    "foodAlcoholInteractions": [
+      {
+        "item": "Alcohol",
+        "warning": "Excessive acute or chronic alcohol intake potentiates metformin's effect on lactate metabolism, significantly elevating lactic acidosis risk.",
+        "severity": "major"
+      },
+      {
+        "item": "Meal Timing",
+        "warning": "Always take with or after meals to minimize gastrointestinal side effects like nausea and diarrhea.",
+        "severity": "minor"
+      }
+    ],
+    "commonSideEffects": [
+      "Diarrhea, nausea, vomiting, abdominal bloating",
+      "Metallic taste in mouth",
+      "Loss of appetite"
+    ],
+    "seriousAdverseEffects": [
+      "Lactic acidosis (deep rapid breathing, muscle cramping, severe weakness, hypothermia)",
+      "Vitamin B12 deficiency with long-term use"
+    ],
+    "administrationWarnings": [
+      "PRESCRIPTION ONLY: Must be prescribed and monitored with blood glucose and renal labs.",
+      "Take with meals to reduce stomach upset. Swallow extended-release tablets whole; do not chew or crush.",
+      "Temporarily discontinue before surgical procedures or imaging with intravenous contrast dyes as instructed by doctor."
+    ],
+    "storageAndHandling": "Store below 25°C in a dry place. Protect from moisture and light. Keep out of reach of children.",
+    "dosageDisclaimer": "Dosage requires clinical titration based on glycemic control and kidney function. Clinix does not calculate diabetic drug dosages.",
+    "manufacturerOrDistributor": "Merck / Ernest Chemists / Danadams",
+    "registrationNumber": "FDA/DR.2024-GH014",
+    "officialLabelUrl": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=07b66970-d731-482d-8b0d-b873523588df",
+    "referenceSource": {
+      "name": "Ghana MoH Standard Treatment Guidelines / ADA Standards of Care",
+      "jurisdiction": "GH",
+      "version": "2024-v1",
+      "sourceUrl": "https://www.fdaghana.gov.gh",
+      "lastReviewedAt": "2026-01-15T00:00:00.000Z",
+      "reviewedBy": "Dr. K. Mensah, Clinical Reviewer"
+    }
+  },
+  {
+    "id": "GH-MED-015",
+    "genericName": "Amlodipine",
+    "brandNames": ["Norvasc", "Amlopin", "Amlo", "Istin"],
+    "therapeuticClass": "Dihydropyridine Calcium Channel Blocker",
+    "classification": "prescription_only",
+    "approvedIndications": [
+      "Treatment of hypertension (high blood pressure)",
+      "Management of chronic stable angina and vasospastic angina"
+    ],
+    "activeIngredients": [
+      { "name": "Amlodipine Besylate", "strength": "5 mg / 10 mg" }
+    ],
+    "availableForms": [
+      { "form": "Tablet", "route": "Oral", "standardStrength": "5 mg, 10 mg" }
+    ],
+    "dosageForms": ["Tablet"],
+    "routes": ["Oral"],
+    "contraindications": [
+      {
+        "condition": "Severe hypotension (systolic BP < 90 mmHg) or cardiogenic shock",
+        "explanation": "Peripheral vasodilation causes profound circulatory collapse.",
+        "severity": "critical"
+      },
+      {
+        "condition": "Severe aortic stenosis",
+        "explanation": "Risk of significant drop in cardiac output and coronary perfusion.",
+        "severity": "critical"
+      },
+      {
+        "condition": "Severe hypersensitivity to dihydropyridine calcium channel blockers",
+        "explanation": "Risk of acute hypersensitivity reactions.",
+        "severity": "critical"
+      }
+    ],
+    "ageRestrictions": {
+      "minAgeYears": 6,
+      "warning": "Approved for pediatric hypertension in children 6-17 years old under pediatric nephrology or cardiology supervision."
+    },
+    "pregnancyPrecautions": {
+      "isContraindicated": false,
+      "warning": "Use only if potential benefit justifies potential risk to fetus. Labetalol, Methyldopa, and Nifedipine are traditionally the first-line oral agents in pregnancy in Ghana."
+    },
+    "breastfeedingPrecautions": {
+      "isContraindicated": false,
+      "warning": "Amlodipine passes into breast milk in small amounts; generally well tolerated, but monitor infant for low blood pressure or lethargy."
+    },
+    "pediatricPrecautions": "Pediatric use strictly managed by pediatric specialists with careful blood pressure monitoring.",
+    "olderAdultPrecautions": "Clearance is decreased in elderly patients; clinicians typically initiate therapy at lower doses (2.5 mg daily).",
+    "interactions": [
+      {
+        "medicineOrClass": "Simvastatin",
+        "effect": "Amlodipine increases simvastatin exposure; daily simvastatin dose should not exceed 20 mg when co-administered to prevent rhabdomyolysis.",
+        "severity": "major"
+      },
+      {
+        "medicineOrClass": "CYP3A4 Inhibitors (Ketoconazole, Itraconazole, Erythromycin)",
+        "effect": "Increases amlodipine serum concentrations, increasing risk of hypotension and severe edema.",
+        "severity": "moderate"
+      }
+    ],
+    "foodAlcoholInteractions": [
+      {
+        "item": "Grapefruit / Grapefruit Juice",
+        "warning": "Grapefruit inhibits CYP3A4 enzymes and can significantly increase amlodipine blood concentrations, leading to severe dizziness and hypotension.",
+        "severity": "moderate"
+      }
+    ],
+    "commonSideEffects": [
+      "Peripheral edema (swelling of ankles and feet)",
+      "Dizziness, flushing, warm feeling in face",
+      "Palpitations or fatigue"
+    ],
+    "seriousAdverseEffects": [
+      "Severe hypotension and syncope (fainting)",
+      "Worsening angina or myocardial infarction upon dose initiation or increase in severe obstructive coronary disease (rare)"
+    ],
+    "administrationWarnings": [
+      "PRESCRIPTION ONLY: Antihypertensive therapy requires medical diagnosis and regular blood pressure monitoring.",
+      "Do not stop taking abruptly without consulting your physician.",
+      "Inform your doctor if ankle swelling becomes uncomfortable or progressive."
+    ],
+    "storageAndHandling": "Store below 25°C in original package. Protect from light and moisture. Keep out of reach of children.",
+    "dosageDisclaimer": "Antihypertensive dosing must be prescribed and monitored by a qualified clinician. Clinix does not calculate blood pressure drug doses.",
+    "manufacturerOrDistributor": "Pfizer / Ernest Chemists / Kinapharma",
+    "registrationNumber": "FDA/DR.2024-GH015",
+    "officialLabelUrl": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=8f219192-d352-45e0-82d8-5541e21b7a20",
+    "referenceSource": {
+      "name": "Ghana MoH Standard Treatment Guidelines / WHO Cardiovascular Guidance",
       "jurisdiction": "GH",
       "version": "2024-v1",
       "sourceUrl": "https://www.fdaghana.gov.gh",

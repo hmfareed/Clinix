@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
-import { connectToDatabase } from "@/lib/db/mongodb";
+import { connectToDatabase, tryConnectToDatabase } from "@/lib/db/mongodb";
+import { defaultFullAssessmentService } from "@/services/full-assessment-service";
 import AssistantConversation, {
   IAssistantConversation,
   AssistantState,
@@ -105,6 +106,9 @@ export class AssistantNotFoundError extends Error {
 }
 
 export class ClinixAssistantService {
+  private inMemoryConversations = new Map<string, any>();
+  private inMemoryMessages = new Map<string, any[]>();
+
   /**
    * Create a new conversation session
    */
@@ -113,25 +117,87 @@ export class ClinixAssistantService {
     language?: string;
     authContext: AssistantAuthContext;
   }): Promise<IAssistantConversation> {
-    await connectToDatabase();
     const { title, language = "en", authContext } = options;
 
     const expiresAt = authContext.userId
       ? undefined
       : new Date(Date.now() + 24 * 60 * 60 * 1000); // 24-hr TTL for guest sessions
 
-    const conversation = await AssistantConversation.create({
-      userId: authContext.userId ? new mongoose.Types.ObjectId(authContext.userId) : undefined,
-      guestTokenHash: authContext.guestTokenHash,
-      title: title || "New Health Consultation",
-      status: "active",
-      currentState: "idle",
-      language,
-      lastActiveAt: new Date(),
-      expiresAt,
-    });
+    const dbAvailable = await tryConnectToDatabase();
+    if (!dbAvailable) {
+      const id = new mongoose.Types.ObjectId();
+      const conv: any = {
+        _id: id,
+        id: String(id),
+        userId: authContext.userId ? new mongoose.Types.ObjectId(authContext.userId) : undefined,
+        guestTokenHash: authContext.guestTokenHash,
+        title: title || "New Health Consultation",
+        status: "active",
+        currentState: "idle",
+        language,
+        lastActiveAt: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        expiresAt,
+        save: async function () {
+          this.lastActiveAt = new Date();
+          this.updatedAt = new Date();
+          return this;
+        },
+        toObject: function () {
+          return { ...this };
+        },
+      };
 
-    return conversation;
+      this.inMemoryConversations.set(String(id), conv);
+      this.inMemoryMessages.set(String(id), []);
+      return conv as IAssistantConversation;
+    }
+
+    try {
+      await connectToDatabase();
+      const conversation = await AssistantConversation.create({
+        userId: authContext.userId ? new mongoose.Types.ObjectId(authContext.userId) : undefined,
+        guestTokenHash: authContext.guestTokenHash,
+        title: title || "New Health Consultation",
+        status: "active",
+        currentState: "idle",
+        language,
+        lastActiveAt: new Date(),
+        expiresAt,
+      });
+
+      return conversation;
+    } catch (err) {
+      console.warn("[CREATE CONVERSATION FALLBACK] DB connection failed, using in-memory conversation:", err);
+      const id = new mongoose.Types.ObjectId();
+      const conv: any = {
+        _id: id,
+        id: String(id),
+        userId: authContext.userId ? new mongoose.Types.ObjectId(authContext.userId) : undefined,
+        guestTokenHash: authContext.guestTokenHash,
+        title: title || "New Health Consultation",
+        status: "active",
+        currentState: "idle",
+        language,
+        lastActiveAt: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        expiresAt,
+        save: async function () {
+          this.lastActiveAt = new Date();
+          this.updatedAt = new Date();
+          return this;
+        },
+        toObject: function () {
+          return { ...this };
+        },
+      };
+
+      this.inMemoryConversations.set(String(id), conv);
+      this.inMemoryMessages.set(String(id), []);
+      return conv as IAssistantConversation;
+    }
   }
 
   /**
@@ -141,19 +207,27 @@ export class ClinixAssistantService {
     conversationId: string,
     authContext: AssistantAuthContext
   ): Promise<IAssistantConversation> {
-    await connectToDatabase();
-
-    if (!mongoose.Types.ObjectId.isValid(conversationId)) {
-      throw new AssistantNotFoundError("Invalid conversation ID format.");
+    const mem = this.inMemoryConversations.get(conversationId);
+    if (mem) {
+      this.verifyOwnership(mem, authContext);
+      return mem as IAssistantConversation;
     }
 
-    const conversation = await AssistantConversation.findById(conversationId);
-    if (!conversation) {
-      throw new AssistantNotFoundError();
+    if (await tryConnectToDatabase()) {
+      await connectToDatabase();
+
+      if (!mongoose.Types.ObjectId.isValid(conversationId)) {
+        throw new AssistantNotFoundError("Invalid conversation ID format.");
+      }
+
+      const conversation = await AssistantConversation.findById(conversationId);
+      if (conversation) {
+        this.verifyOwnership(conversation, authContext);
+        return conversation;
+      }
     }
 
-    this.verifyOwnership(conversation, authContext);
-    return conversation;
+    throw new AssistantNotFoundError();
   }
 
   /**
@@ -163,21 +237,38 @@ export class ClinixAssistantService {
     authContext: AssistantAuthContext,
     limit = 20
   ): Promise<IAssistantConversation[]> {
-    await connectToDatabase();
-
-    const query: Record<string, unknown> = {};
-    if (authContext.userId) {
-      query.userId = new mongoose.Types.ObjectId(authContext.userId);
-    } else if (authContext.guestTokenHash) {
-      query.guestTokenHash = authContext.guestTokenHash;
-    } else {
-      return [];
+    const dbAvailable = await tryConnectToDatabase();
+    if (!dbAvailable) {
+      const list: any[] = [];
+      for (const conv of this.inMemoryConversations.values()) {
+        if (authContext.userId && conv.userId?.toString() === authContext.userId) {
+          list.push(conv);
+        } else if (authContext.guestTokenHash && conv.guestTokenHash === authContext.guestTokenHash) {
+          list.push(conv);
+        }
+      }
+      return list.slice(0, limit);
     }
 
-    return AssistantConversation.find(query)
-      .sort({ updatedAt: -1 })
-      .limit(limit)
-      .lean();
+    try {
+      await connectToDatabase();
+
+      const query: Record<string, unknown> = {};
+      if (authContext.userId) {
+        query.userId = new mongoose.Types.ObjectId(authContext.userId);
+      } else if (authContext.guestTokenHash) {
+        query.guestTokenHash = authContext.guestTokenHash;
+      } else {
+        return [];
+      }
+
+      return AssistantConversation.find(query)
+        .sort({ updatedAt: -1 })
+        .limit(limit)
+        .lean();
+    } catch {
+      return [];
+    }
   }
 
   /**
@@ -188,11 +279,20 @@ export class ClinixAssistantService {
     authContext: AssistantAuthContext
   ): Promise<IAssistantMessage[]> {
     await this.getConversation(conversationId, authContext);
-    return AssistantMessage.find({
-      conversationId: new mongoose.Types.ObjectId(conversationId),
-    })
-      .sort({ createdAt: 1 })
-      .lean();
+    const mem = this.inMemoryMessages.get(conversationId);
+    if (mem) {
+      return [...mem];
+    }
+
+    if (await tryConnectToDatabase()) {
+      return AssistantMessage.find({
+        conversationId: new mongoose.Types.ObjectId(conversationId),
+      })
+        .sort({ createdAt: 1 })
+        .lean();
+    }
+
+    return [];
   }
 
   /**
@@ -219,7 +319,6 @@ export class ClinixAssistantService {
    * Main turn execution: Process patient message and return structured response
    */
   async processPatientMessage(input: SendMessageInput): Promise<AssistantTurnResult> {
-    await connectToDatabase();
     const { conversationId, message, clientMessageId, authContext, locationContext } = input;
 
     const cleanMessage = message.trim();
@@ -228,35 +327,63 @@ export class ClinixAssistantService {
     }
 
     const conversation = await this.getConversation(conversationId, authContext);
+    const isMem = this.inMemoryConversations.has(conversationId);
+
+    const persistMessage = async (msgData: any) => {
+      if (isMem) {
+        const memList = this.inMemoryMessages.get(conversationId) || [];
+        const enriched = {
+          _id: new mongoose.Types.ObjectId(),
+          createdAt: new Date(),
+          ...msgData,
+        };
+        memList.push(enriched);
+        this.inMemoryMessages.set(conversationId, memList);
+        return enriched;
+      }
+      return AssistantMessage.create(msgData);
+    };
 
     // =========================================================================
     // 1. IDEMPOTENCY CHECK
     // =========================================================================
     if (clientMessageId) {
-      const existingUserMsg = await AssistantMessage.findOne({
-        conversationId: conversation._id,
-        clientMessageId,
-      });
+      let existingUserMsg: any = null;
+      let subsequentMsg: any = null;
 
-      if (existingUserMsg) {
-        // Return existing subsequent assistant response if available
-        const subsequentMsg = await AssistantMessage.findOne({
+      if (isMem) {
+        const memList = this.inMemoryMessages.get(conversationId) || [];
+        existingUserMsg = memList.find((m) => m.clientMessageId === clientMessageId);
+        if (existingUserMsg) {
+          subsequentMsg = memList.find(
+            (m) => m.role === "assistant" && new Date(m.createdAt) > new Date(existingUserMsg.createdAt)
+          );
+        }
+      } else {
+        existingUserMsg = await AssistantMessage.findOne({
           conversationId: conversation._id,
-          role: "assistant",
-          createdAt: { $gt: existingUserMsg.createdAt },
-        }).sort({ createdAt: 1 });
+          clientMessageId,
+        });
 
-        if (subsequentMsg && subsequentMsg.structuredPayload) {
-          const parsed = structuredAssistantResponseSchema.safeParse(subsequentMsg.structuredPayload);
-          if (parsed.success) {
-            return {
-              conversationId: String(conversation._id),
-              currentState: conversation.currentState,
-              intent: (subsequentMsg.intent as AssistantIntent) || "symptom_assessment",
-              response: parsed.data,
-              assessmentId: conversation.assessmentId ? String(conversation.assessmentId) : undefined,
-            };
-          }
+        if (existingUserMsg) {
+          subsequentMsg = await AssistantMessage.findOne({
+            conversationId: conversation._id,
+            role: "assistant",
+            createdAt: { $gt: existingUserMsg.createdAt },
+          }).sort({ createdAt: 1 });
+        }
+      }
+
+      if (existingUserMsg && subsequentMsg && subsequentMsg.structuredPayload) {
+        const parsed = structuredAssistantResponseSchema.safeParse(subsequentMsg.structuredPayload);
+        if (parsed.success) {
+          return {
+            conversationId: String(conversation._id),
+            currentState: conversation.currentState,
+            intent: (subsequentMsg.intent as AssistantIntent) || "symptom_assessment",
+            response: parsed.data,
+            assessmentId: conversation.assessmentId ? String(conversation.assessmentId) : undefined,
+          };
         }
       }
     }
@@ -264,7 +391,7 @@ export class ClinixAssistantService {
     // =========================================================================
     // 2. STORE PATIENT MESSAGE
     // =========================================================================
-    await AssistantMessage.create({
+    await persistMessage({
       conversationId: conversation._id,
       userId: authContext.userId ? new mongoose.Types.ObjectId(authContext.userId) : undefined,
       guestTokenHash: authContext.guestTokenHash,
@@ -333,7 +460,7 @@ export class ClinixAssistantService {
       await conversation.save();
 
       // Persist assistant message
-      await AssistantMessage.create({
+      await persistMessage({
         conversationId: conversation._id,
         userId: authContext.userId ? new mongoose.Types.ObjectId(authContext.userId) : undefined,
         guestTokenHash: authContext.guestTokenHash,
@@ -441,7 +568,7 @@ export class ClinixAssistantService {
     conversation.lastActiveAt = new Date();
     await conversation.save();
 
-    await AssistantMessage.create({
+    await persistMessage({
       conversationId: conversation._id,
       userId: authContext.userId ? new mongoose.Types.ObjectId(authContext.userId) : undefined,
       guestTokenHash: authContext.guestTokenHash,
@@ -468,8 +595,8 @@ export class ClinixAssistantService {
       // Populate assessmentDetails for the presenting_result state so the UI can render the rich card
       assessmentDetails:
         structuredResponse.state === "presenting_result" && conversation.assessmentId
-          ? await Assessment.findById(conversation.assessmentId)
-              .lean()
+          ? await defaultFullAssessmentService
+              .getAssessment(String(conversation.assessmentId), authContext)
               .then((doc) =>
                 doc
                   ? {
@@ -779,11 +906,15 @@ export class ClinixAssistantService {
     authContext: AssistantAuthContext
   ): Promise<StructuredAssistantResponse> {
     const currentState = conversation.currentState;
+    const isMem = this.inMemoryConversations.has(String(conversation._id));
 
     // Check if there is an active assessment linked
-    let assessmentDoc: IAssessment | null = null;
+    let assessmentDoc: any = null;
     if (conversation.assessmentId) {
-      assessmentDoc = await Assessment.findById(conversation.assessmentId);
+      assessmentDoc = await defaultFullAssessmentService.getAssessment(
+        String(conversation.assessmentId),
+        authContext
+      );
     }
 
     // =========================================================================
@@ -797,33 +928,39 @@ export class ClinixAssistantService {
       const detectedPathway = detectSymptomPathway(message);
       const pathwayDef = SYMPTOM_PATHWAYS[detectedPathway];
 
-      // Initialize structured assessment in database
-      assessmentDoc = await Assessment.create({
-        patientId: authContext.userId
-          ? new mongoose.Types.ObjectId(authContext.userId)
-          : new mongoose.Types.ObjectId(), // Safe placeholder for guests
-        conversationId: conversation._id,
-        symptoms: [{ description: message }],
-        urgency: "routine",
-        summary: "Symptom collection started.",
-        possibleConditions: [],
-        recommendations: [],
-        limitations: ["Assessment in progress. Not a final diagnosis."],
-        triage: {
-          level: "routine",
-          ruleSetVersion: "1.0",
-          checkedAt: new Date(),
-        },
-        aiMetadata: {
-          provider: "NVIDIA",
-          model: MODEL,
-          promptVersion: ASSISTANT_PROMPT_VERSION,
-        },
-        // Store detected pathway in aiMetadata for continuity
-      });
+      // Initialize structured assessment in database or in-memory
+      if (isMem || !(await tryConnectToDatabase())) {
+        assessmentDoc = (await defaultFullAssessmentService.initAssessment({
+          authContext,
+          source: "conversation",
+          conversationId: String(conversation._id),
+        })) as any;
+      } else {
+        assessmentDoc = await Assessment.create({
+          patientId: authContext.userId
+            ? new mongoose.Types.ObjectId(authContext.userId)
+            : new mongoose.Types.ObjectId(), // Safe placeholder for guests
+          conversationId: conversation._id,
+          symptoms: [{ description: message }],
+          urgency: "routine",
+          summary: "Symptom collection started.",
+          possibleConditions: [],
+          recommendations: [],
+          limitations: ["Assessment in progress. Not a final diagnosis."],
+          triage: {
+            level: "routine",
+            ruleSetVersion: "1.0",
+            checkedAt: new Date(),
+          },
+          aiMetadata: {
+            provider: "NVIDIA",
+            model: MODEL,
+            promptVersion: ASSISTANT_PROMPT_VERSION,
+          },
+        });
+      }
 
       // Store pathway on assessment for later retrieval
-      // We persist the pathway in the aiMetadata field as a simple mechanism
       (assessmentDoc as any).aiMetadata = {
         ...(assessmentDoc as any).aiMetadata,
         detectedPathway,
@@ -860,7 +997,7 @@ export class ClinixAssistantService {
     // =========================================================================
 
     // Build consolidated symptom text from all collected info
-    const existingSymptoms = assessmentDoc.symptoms.map((s) => s.description).join("; ");
+    const existingSymptoms = assessmentDoc.symptoms.map((s: any) => s.description).join("; ");
     const consolidatedText = `${existingSymptoms}. Additional update: ${message}`;
 
     // Append the latest answer to symptoms for richer context
@@ -907,12 +1044,14 @@ export class ClinixAssistantService {
     }
 
     // Retrieve conversation history for turn counting
-    const history = await AssistantMessage.find({ conversationId: conversation._id }).sort({ createdAt: 1 });
-    const userTurnCount = history.filter((m) => m.role === "patient").length;
+    const history = isMem
+      ? this.inMemoryMessages.get(String(conversation._id)) || []
+      : await AssistantMessage.find({ conversationId: conversation._id }).sort({ createdAt: 1 });
+    const userTurnCount = history.filter((m: any) => m.role === "patient").length;
 
     // Determine which adaptive pathway to use
     // We re-detect from the full consolidated symptom text for best coverage
-    const fullSymptomText = assessmentDoc.symptoms.map((s) => s.description).join(" ");
+    const fullSymptomText = assessmentDoc.symptoms.map((s: any) => s.description).join(" ");
     const currentPathway = detectSymptomPathway(fullSymptomText);
     const pathwayDef = SYMPTOM_PATHWAYS[currentPathway];
 

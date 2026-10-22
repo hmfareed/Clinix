@@ -12,6 +12,8 @@ import Assessment from "@/models/Assessment";
 // Mock mongodb connection
 vi.mock("@/lib/db/mongodb", () => ({
   connectToDatabase: vi.fn().mockResolvedValue(true),
+  tryConnectToDatabase: vi.fn().mockResolvedValue(true),
+  isDatabaseConnected: vi.fn().mockReturnValue(true),
 }));
 
 // Mock audit logger so test runs in isolation without DB hang

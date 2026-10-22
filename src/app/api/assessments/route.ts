@@ -31,8 +31,13 @@ export async function GET(req: NextRequest) {
       success: true,
       data: assessments.map((a) => ({
         id: String(a._id),
+        status: a.status || (a.urgency ? "completed" : "draft"),
+        isDraft: Boolean(a.isDraft),
         urgency: a.urgency,
         summary: a.summary,
+        primaryComplaint: a.primaryComplaint,
+        reportedFacts: a.reportedFacts,
+        interviewProgress: a.interviewProgress,
         symptoms: a.symptoms,
         possibleConditions: a.possibleConditions,
         recommendations: a.recommendations,
@@ -41,6 +46,8 @@ export async function GET(req: NextRequest) {
         triage: a.triage,
         aiMetadata: a.aiMetadata,
         createdAt: a.createdAt,
+        updatedAt: a.updatedAt,
+        lastSavedAt: a.lastSavedAt,
         isUnverifiedAI: true,
       })),
     });
