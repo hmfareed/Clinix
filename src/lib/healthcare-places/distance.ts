@@ -31,6 +31,18 @@ export function formatDistance(meters?: number): string {
   return `~${km} km away`;
 }
 
+/**
+ * Clearly labels distance as straight-line distance, distinguishing it from road/driving distance.
+ */
+export function formatStraightLineDistance(meters?: number): string {
+  if (meters === undefined || meters === null) return "Distance unknown";
+  if (meters < 1000) {
+    return `~${meters} m (straight-line)`;
+  }
+  const km = (meters / 1000).toFixed(1);
+  return `~${km} km (straight-line)`;
+}
+
 function toRad(degrees: number): number {
   return (degrees * Math.PI) / 180;
 }

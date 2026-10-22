@@ -1128,11 +1128,17 @@ export class ClinixAssistantService {
               .join("\n")
           : "";
 
-      // Auto-fetch nearby clinics to include in actions
+      // Auto-fetch nearby clinics to include in actions via shared healthcare places service
       let clinicActions: StructuredAssistantResponse["actions"] = [];
       try {
-        const facilities = await defaultFacilityService.searchFacilities({ query: "clinic hospital", limit: 2 });
-        clinicActions = facilities.map((f, i) => ({
+        const placesRes = await defaultHealthcarePlacesService.searchNearby({
+          latitude: 5.556,
+          longitude: -0.1969,
+          radiusMeters: 10000,
+          facilityTypes: ["hospital", "clinic"],
+          limit: 2,
+        });
+        clinicActions = placesRes.facilities.map((f, i) => ({
           id: `nearby_clinic_${i}`,
           label: f.name,
           type: "link" as const,

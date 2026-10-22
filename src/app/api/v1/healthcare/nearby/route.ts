@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { latitude, longitude, radiusMeters, facilityTypes, limit } = parseResult.data;
+    const { latitude, longitude, radiusMeters, facilityTypes, query, limit } = parseResult.data;
 
     // Privacy safeguard: Reject requests containing forbidden diagnostic keywords
     const bodyStr = JSON.stringify(rawBody).toLowerCase();
@@ -78,6 +78,7 @@ export async function POST(req: NextRequest) {
       longitude,
       radiusMeters,
       facilityTypes,
+      query,
       limit,
     });
 

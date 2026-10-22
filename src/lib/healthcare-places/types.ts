@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export type FacilityType = "hospital" | "clinic" | "emergency_department" | "pharmacy";
+export type FacilityType = "hospital" | "clinic" | "emergency_department" | "pharmacy" | "specialist";
 
 export interface NormalizedFacility {
   id: string;
@@ -18,6 +18,16 @@ export interface NormalizedFacility {
   provider: string; // e.g. "google_places_new" | "ghana_health_service" | "verified_directory"
   lastVerifiedAt?: string;
   services?: string[];
+  phoneVerified?: boolean;
+  accessibility?: {
+    wheelchairAccessible?: boolean | null;
+    parking?: boolean | null;
+  };
+  appointmentBooking?: {
+    available: boolean;
+    url?: string | null;
+    note?: string;
+  };
 }
 
 export const nearbySearchRequestSchema = z.object({
@@ -26,12 +36,13 @@ export const nearbySearchRequestSchema = z.object({
   radiusMeters: z.number().min(500).max(25000).default(5000),
   facilityTypes: z
     .union([
-      z.enum(["hospital", "clinic", "emergency_department", "pharmacy", "all"]),
-      z.array(z.enum(["hospital", "clinic", "emergency_department", "pharmacy", "all"])),
+      z.enum(["hospital", "clinic", "emergency_department", "pharmacy", "specialist", "all"]),
+      z.array(z.enum(["hospital", "clinic", "emergency_department", "pharmacy", "specialist", "all"])),
     ])
     .optional()
     .default("all"),
-  limit: z.number().min(1).max(30).default(10).optional(),
+  query: z.string().max(100).optional(),
+  limit: z.number().min(1).max(50).default(20).optional(),
   pageToken: z.string().optional(),
 });
 
@@ -40,6 +51,7 @@ export type NearbySearchRequest = {
   longitude: number;
   radiusMeters?: number;
   facilityTypes?: FacilityType | "all" | Array<FacilityType | "all">;
+  query?: string;
   limit?: number;
   pageToken?: string;
 };

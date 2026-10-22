@@ -16,7 +16,7 @@ export class VerifiedDirectoryProvider implements IHealthcarePlacesProvider {
   }
 
   async searchNearby(request: NearbySearchRequest): Promise<NormalizedFacility[]> {
-    const { latitude, longitude, radiusMeters = 5000, facilityTypes, limit = 10 } = request;
+    const { latitude, longitude, radiusMeters = 5000, facilityTypes, query, limit = 20 } = request;
 
     // Normalize types filter
     const targetTypes: string[] = Array.isArray(facilityTypes)
@@ -24,6 +24,8 @@ export class VerifiedDirectoryProvider implements IHealthcarePlacesProvider {
       : facilityTypes && facilityTypes !== "all"
       ? [facilityTypes]
       : [];
+
+    const searchQuery = query?.trim().toLowerCase();
 
     let matched: NormalizedFacility[] = [];
 
@@ -34,8 +36,24 @@ export class VerifiedDirectoryProvider implements IHealthcarePlacesProvider {
 
       // Filter by facilityType
       const rawType = (raw.type || "clinic") as FacilityType;
-      if (targetTypes.length > 0 && !targetTypes.includes("all") && !targetTypes.includes(rawType)) {
-        continue;
+      if (targetTypes.length > 0 && !targetTypes.includes("all")) {
+        if (!targetTypes.includes(rawType)) {
+          continue;
+        }
+      }
+
+      // Filter by search query (name, specialty/services, address, or type)
+      if (searchQuery) {
+        const nameMatch = raw.name?.toLowerCase().includes(searchQuery);
+        const addressMatch = raw.address?.toLowerCase().includes(searchQuery);
+        const typeMatch = rawType.toLowerCase().includes(searchQuery);
+        const servicesMatch = raw.services?.some((s: string) =>
+          s.toLowerCase().includes(searchQuery)
+        );
+
+        if (!nameMatch && !addressMatch && !typeMatch && !servicesMatch) {
+          continue;
+        }
       }
 
       // Compute approximate straight-line distance
@@ -62,6 +80,7 @@ export class VerifiedDirectoryProvider implements IHealthcarePlacesProvider {
         longitude: facLng,
         distanceMeters,
         phoneNumber: raw.phone || null,
+        phoneVerified: Boolean(raw.phoneVerified),
         websiteUrl: raw.website || null,
         mapsUrl,
         openingHours: raw.hours?.text || null,
@@ -69,6 +88,14 @@ export class VerifiedDirectoryProvider implements IHealthcarePlacesProvider {
         provider: raw.source || "Ghana Health Service Directory",
         lastVerifiedAt: raw.lastVerifiedAt || new Date().toISOString(),
         services: raw.services || [],
+        accessibility: {
+          wheelchairAccessible: raw.accessibility?.wheelchairAccessible ?? true,
+          parking: raw.accessibility?.parking ?? true,
+        },
+        appointmentBooking: raw.appointmentBooking || {
+          available: false,
+          note: "Online booking is not integrated for this facility. Please call directly to schedule an appointment.",
+        },
       });
     }
 

@@ -34,16 +34,27 @@ export class GooglePlacesNewProvider implements IHealthcarePlacesProvider {
       : ["all"];
 
     if (targetTypes.includes("all")) {
-      includedTypes.push("hospital", "medical_clinic", "pharmacy", "doctor");
+      includedTypes.push(
+        "hospital",
+        "general_hospital",
+        "medical_clinic",
+        "medical_center",
+        "doctor",
+        "pharmacy",
+        "drugstore"
+      );
     } else {
       if (targetTypes.includes("hospital") || targetTypes.includes("emergency_department")) {
-        includedTypes.push("hospital");
+        includedTypes.push("hospital", "general_hospital");
       }
       if (targetTypes.includes("clinic")) {
-        includedTypes.push("medical_clinic", "doctor");
+        includedTypes.push("medical_clinic", "medical_center", "doctor");
       }
       if (targetTypes.includes("pharmacy")) {
-        includedTypes.push("pharmacy");
+        includedTypes.push("pharmacy", "drugstore");
+      }
+      if (targetTypes.includes("specialist")) {
+        includedTypes.push("doctor", "physiotherapist", "dentist", "dental_clinic");
       }
     }
 
@@ -78,6 +89,9 @@ export class GooglePlacesNewProvider implements IHealthcarePlacesProvider {
       "places.websiteUri",
       "places.googleMapsUri",
       "places.currentOpeningHours",
+      "places.regularOpeningHours",
+      "places.businessStatus",
+      "places.accessibilityOptions",
     ].join(",");
 
     const res = await fetch(url, {
@@ -101,7 +115,11 @@ export class GooglePlacesNewProvider implements IHealthcarePlacesProvider {
       return [];
     }
 
-    const normalized: NormalizedFacility[] = data.places.map((p: any) => {
+    const activePlaces = data.places.filter(
+      (p: any) => p.businessStatus !== "CLOSED_PERMANENTLY"
+    );
+
+    const normalized: NormalizedFacility[] = activePlaces.map((p: any) => {
       const pLat = p.location?.latitude ?? latitude;
       const pLng = p.location?.longitude ?? longitude;
 
@@ -114,6 +132,13 @@ export class GooglePlacesNewProvider implements IHealthcarePlacesProvider {
         facilityType = "hospital";
       } else if (types.includes("pharmacy") || p.primaryType === "pharmacy") {
         facilityType = "pharmacy";
+      } else if (
+        types.includes("doctor") ||
+        types.includes("physiotherapist") ||
+        types.includes("dentist") ||
+        p.primaryType === "doctor"
+      ) {
+        facilityType = "specialist";
       }
 
       const dist = calculateHaversineDistanceMeters(latitude, longitude, pLat, pLng);
@@ -128,12 +153,21 @@ export class GooglePlacesNewProvider implements IHealthcarePlacesProvider {
         longitude: pLng,
         distanceMeters: dist,
         phoneNumber: p.nationalPhoneNumber || null,
+        phoneVerified: Boolean(p.nationalPhoneNumber),
         websiteUrl: p.websiteUri || null,
         mapsUrl,
         openingHours: p.currentOpeningHours?.weekdayDescriptions?.join("; ") || null,
         openNow: p.currentOpeningHours?.openNow ?? null,
         provider: "Google Places API (New)",
         lastVerifiedAt: new Date().toISOString(),
+        accessibility: {
+          wheelchairAccessible: Boolean(p.accessibilityOptions?.wheelchairAccessibleEntrance),
+          parking: Boolean(p.accessibilityOptions?.wheelchairAccessibleParking),
+        },
+        appointmentBooking: {
+          available: false,
+          note: "Online appointment booking not verified via Places API. Please call facility directly.",
+        },
       };
     });
 

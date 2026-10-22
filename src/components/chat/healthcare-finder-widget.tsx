@@ -17,7 +17,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { NormalizedFacility, FacilityType } from "@/lib/healthcare-places/types";
-import { formatDistance } from "@/lib/healthcare-places/distance";
+import { formatDistance, formatStraightLineDistance } from "@/lib/healthcare-places/distance";
 
 export type LocationSearchState =
   | "idle"
@@ -71,34 +71,52 @@ export function HealthcareFinderWidget({
 
     setState("requesting_permission");
     setErrorMessage("");
+    setFacilities([]);
 
+    const onSuccess = async (pos: GeolocationPosition) => {
+      const accuracy = Math.round(pos.coords.accuracy);
+      const coords = {
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude,
+      };
+      setCurrentCoords(coords);
+      const label = accuracy <= 200 ? `Your Current Location (±${accuracy}m)` : "Your Current Location";
+      setLocationLabel(label);
+      await executeNearbySearch(coords.lat, coords.lng, selectedRadiusMeters, selectedType);
+    };
+
+    const onError = (err: GeolocationPositionError) => {
+      console.warn("[GEOLOCATION PERMISSION ERROR]", err);
+      if (err.code === err.PERMISSION_DENIED) {
+        setState("permission_denied");
+        setErrorMessage("Location permission was denied. You can search by town or neighbourhood below.");
+      } else if (err.code === err.TIMEOUT) {
+        setState("location_unavailable");
+        setErrorMessage("Location request timed out. Please enter your town or landmark below.");
+      } else {
+        setState("location_unavailable");
+        setErrorMessage("Unable to retrieve device coordinates. Please enter your location manually.");
+      }
+    };
+
+    // Attempt high accuracy GPS first
     navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const coords = {
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude,
-        };
-        setCurrentCoords(coords);
-        setLocationLabel("Your Current Location");
-        await executeNearbySearch(coords.lat, coords.lng, selectedRadiusMeters, selectedType);
-      },
+      onSuccess,
       (err) => {
-        console.warn("[GEOLOCATION PERMISSION ERROR]", err);
-        if (err.code === err.PERMISSION_DENIED) {
-          setState("permission_denied");
-          setErrorMessage("Location permission was denied. You can search by town or neighbourhood below.");
-        } else if (err.code === err.TIMEOUT) {
-          setState("location_unavailable");
-          setErrorMessage("Location request timed out. Please enter your town or landmark below.");
+        if (err.code === err.TIMEOUT) {
+          navigator.geolocation.getCurrentPosition(onSuccess, onError, {
+            enableHighAccuracy: false,
+            timeout: 8000,
+            maximumAge: 30000,
+          });
         } else {
-          setState("location_unavailable");
-          setErrorMessage("Unable to retrieve device coordinates. Please enter your location manually.");
+          onError(err);
         }
       },
       {
-        enableHighAccuracy: false,
+        enableHighAccuracy: true,
         timeout: 10000,
-        maximumAge: 60000,
+        maximumAge: 0,
       }
     );
   }
@@ -393,6 +411,7 @@ export function HealthcareFinderWidget({
                 { key: "clinic", label: "Clinics" },
                 { key: "emergency_department", label: "Emergency" },
                 { key: "pharmacy", label: "Pharmacies" },
+                { key: "specialist", label: "Specialists" },
               ].map(({ key, label }) => (
                 <button
                   key={key}
@@ -412,7 +431,7 @@ export function HealthcareFinderWidget({
             {/* Radius Selector */}
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] uppercase font-bold text-zinc-500">Radius:</span>
-              {[5000, 10000, 25000].map((r) => (
+              {[1000, 5000, 10000, 25000].map((r) => (
                 <button
                   key={r}
                   type="button"
@@ -423,7 +442,7 @@ export function HealthcareFinderWidget({
                       : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800 border border-zinc-800"
                   }`}
                 >
-                  {r / 1000} km
+                  {r >= 1000 ? `${r / 1000} km` : `${r} m`}
                 </button>
               ))}
             </div>
@@ -439,6 +458,8 @@ export function HealthcareFinderWidget({
                   ? "bg-blue-950/80 text-blue-300 border-blue-800/80"
                   : facility.facilityType === "pharmacy"
                   ? "bg-amber-950/80 text-amber-300 border-amber-800/80"
+                  : facility.facilityType === "specialist"
+                  ? "bg-purple-950/80 text-purple-300 border-purple-800/80"
                   : "bg-teal-950/80 text-teal-300 border-teal-800/80";
 
               const badgeLabel =
@@ -448,6 +469,8 @@ export function HealthcareFinderWidget({
                   ? "Hospital"
                   : facility.facilityType === "pharmacy"
                   ? "Pharmacy"
+                  : facility.facilityType === "specialist"
+                  ? "Specialist Facility"
                   : "Clinic / Center";
 
               return (
@@ -467,9 +490,12 @@ export function HealthcareFinderWidget({
                     </div>
 
                     {facility.distanceMeters !== undefined && (
-                      <span className="shrink-0 text-[11px] font-bold text-teal-400 bg-teal-950/50 border border-teal-800/60 rounded px-2 py-0.5 flex items-center gap-1">
+                      <span
+                        title="Approximate straight-line distance. Road distance and travel time will vary depending on route and traffic."
+                        className="shrink-0 text-[11px] font-bold text-teal-400 bg-teal-950/50 border border-teal-800/60 rounded px-2 py-0.5 flex items-center gap-1"
+                      >
                         <Navigation className="h-3 w-3" />
-                        {formatDistance(facility.distanceMeters)}
+                        {formatStraightLineDistance(facility.distanceMeters)}
                       </span>
                     )}
                   </div>
